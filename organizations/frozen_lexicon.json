@@ -1,0 +1,91 @@
+{
+  "_about": "Frozen self-identification lexicon for the TPG organizational strand. This file is the single authoritative copy. It is attached to the OSF registration and read at runtime by lexicon_proxy.py; the Codebook sheet of the protocol workbook records the same terms for coders.",
+  "_rules": [
+    "Every term derives from the manuscript's own taxonomy section, so the instrument operationalizes the argument rather than importing vocabulary the study does not engage.",
+    "This list is FROZEN. Do not add terms during collection. A term surfaced during the review that is absent from this list is a FINDING, recorded in nonlexicon_self_description and reported as a result.",
+    "Patterns are surface variants counted as the same canonical term. They absorb spelling and spacing differences only, and never broaden the concept.",
+    "Matching is case-insensitive. A match is a SAMPLING AID only: it is not the tier assignment, which requires the placement of the phrase and the identity of the speaker."
+  ],
+  "version": "1.0",
+  "frozen_for": "TPG preregistration update",
+  "term_count": 12,
+  "terms": [
+    {
+      "term": "civic tech",
+      "patterns": [
+        "civic[\\s\\-]tech\\b",
+        "civic[\\s\\-]technolog(?:y|ies|ist|ists)\\b"
+      ]
+    },
+    {
+      "term": "public interest technology",
+      "patterns": [
+        "public[\\s\\-]interest[\\s\\-]tech\\b",
+        "public[\\s\\-]interest[\\s\\-]technolog(?:y|ies|ist|ists)\\b"
+      ]
+    },
+    {
+      "term": "tech for good",
+      "patterns": [
+        "tech(?:nology)?[\\s\\-]for[\\s\\-]good\\b"
+      ]
+    },
+    {
+      "term": "data for good",
+      "patterns": [
+        "data[\\s\\-]for[\\s\\-]good\\b"
+      ]
+    },
+    {
+      "term": "data science / AI for social good",
+      "patterns": [
+        "data[\\s\\-]science[\\s\\-]for[\\s\\-]social[\\s\\-]good\\b",
+        "\\bAI[\\s\\-]for[\\s\\-]social[\\s\\-]good\\b",
+        "artificial[\\s\\-]intelligence[\\s\\-]for[\\s\\-]social[\\s\\-]good\\b",
+        "\\bAI[\\s\\-]for[\\s\\-]good\\b"
+      ]
+    },
+    {
+      "term": "e-government",
+      "patterns": [
+        "\\be[\\s\\-]?government\\b"
+      ]
+    },
+    {
+      "term": "e-democracy",
+      "patterns": [
+        "\\be[\\s\\-]?democracy\\b"
+      ]
+    },
+    {
+      "term": "govtech",
+      "patterns": [
+        "\\bgov[\\s\\-]?tech\\b"
+      ]
+    },
+    {
+      "term": "open government",
+      "patterns": [
+        "open[\\s\\-]government\\b"
+      ]
+    },
+    {
+      "term": "digital civics",
+      "patterns": [
+        "digital[\\s\\-]civics\\b"
+      ]
+    },
+    {
+      "term": "crowd-civic systems",
+      "patterns": [
+        "crowd[\\s\\-]civic[\\s\\-]systems?\\b"
+      ]
+    },
+    {
+      "term": "data activism",
+      "patterns": [
+        "data[\\s\\-]activis(?:m|t|ts)\\b"
+      ]
+    }
+  ]
+}
