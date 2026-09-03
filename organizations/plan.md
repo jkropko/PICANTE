@@ -155,10 +155,15 @@ A few fields on the list below aren't coded by hand at all — `org_id`, `block`
 
 ### Framework dimensions
 
+These four are the same four we code on the literature side, so that we can compare what the field writes against what the field does.
+
 - `who_participates` — who the organization treats as taking part in its work
 - `who_benefits` — who the work is understood to be for
-- `what_social_good_means` — how the organization defines the good it pursues
-- `who_decides` — who determines what counts as good
+- `what_social_good_and_who_decides` — how the organization defines the good it pursues, and who is positioned to decide that. One field, not two. If a record answers one half and not the other, record the half that's there and note the absence
+- `what_counts_as_technology` — what the organization treats as the relevant technology of its work. This is about conceptual scope, not tooling: a group whose "technology" is a text-message hotline and a group whose "technology" is a machine-learning pipeline are answering this differently. **Not the same as the `technologies` field below**, which just records what they actually use
+
+### Functional role
+
 - `ecosystem_role` — practices, funds, studies, trains, convenes; multiple allowed, fixed list, not the same as legal form
 
 ### Functional and descriptive
@@ -168,7 +173,7 @@ A few fields on the list below aren't coded by hand at all — `org_id`, `block`
 - `name`, `hq`, `focus`, `projects`, `founded`, `mission`, `expertise`, `contact` — basic descriptive facts
 - `org_form` — nonprofit, for-profit, government, university, or public-private partnership; what the organization *is*, not what it does
 - `funding_foundations`, `grants`, `other` — funding sources as publicly reported
-- `technologies` — technology types, six-way select; codes still need defining
+- `technologies` — the technology types the organization actually uses, six-way select: SE (software engineering / product build), DS (data science, analytics, ML/AI), OD (open data, open source, civic data infrastructure), UX (design, research, service design), POL (policy, governance, standards, procurement), HW (hardware, devices, connectivity). Descriptive only — this is *what they use*, not the `what_counts_as_technology` dimension above
 
 **If you can't determine a field, write `undetermined` and a short note. Don't guess.** How often a field comes back undetermined is itself a result — it tells us what organizations do and don't disclose.
 
@@ -209,7 +214,7 @@ AI points to candidate passages with their exact character spans and proposes no
 **`tier`**
 The RA's judgment alone. The model contributes nothing here, not even a suggestion, because tier depends on where the phrase sits and who is speaking. Jon re-derives tier from the recorded phrase, placement, and speaker for every record.
 
-**Framework dimensions** — `who_participates`, `who_benefits`, `what_social_good_means`, `who_decides`
+**Framework dimensions** — `who_participates`, `who_benefits`, `what_social_good_and_who_decides`, `what_counts_as_technology`
 Akshita and Carmen each code independently for every record, without conferring. Jon adjudicates every disagreement. The model codes separately in the dark, withheld until the human value is final.
 
 **`ecosystem_role`**
@@ -224,8 +229,8 @@ There are three blocks of organizations: public interest technology, civic tech,
 
 - `who_participates`
 - `who_benefits`
-- `what_social_good_means`
-- `who_decides`
+- `what_social_good_and_who_decides`
+- `what_counts_as_technology`
 - `ecosystem_role`
 
 Then we stop coding that block. We're finished when all three blocks have hit the rule.
