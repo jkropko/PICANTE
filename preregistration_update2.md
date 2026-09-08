@@ -214,7 +214,7 @@ For each included work in the literature strand, the main variables are: traditi
 
 ## Dependent variables — organizational strand
 
-[Existing text, with "the four framework dimensions" replaced by "the five framework dimensions".]
+For the organizational strand, the main variables are: provenance (originating frame, block, admission mechanism, frame type, date identified); screening outcomes on each criterion and the first criterion failed; unit-resolution outcome; frame-operator status and the frames operated; organizational status (active / dormant / closed) with date and dated evidence artifact; tier (self-applies a lexicon label, or does the work without the field vocabulary); self-applied label recorded verbatim, with the lexicon term matched, the URL, access date, placement, and whether the organization is describing itself or quoting another party; self-descriptive phrases that match no lexicon term, recorded verbatim; ecosystem role (practices / funds / studies / trains / convenes); named partner organizations; legal form; headquarters location; founding year; funding sources; staff expertise; technologies; and the same five framework dimensions used in the literature strand.
 
 ## Query strings — route (2)
 
@@ -259,7 +259,9 @@ Third, three seeds are recent enough that forward citation chasing will return l
 
 ## Entities to extract — organizational strand
 
-[Existing text, with "the four framework dimensions" replaced by "the five framework dimensions".]
+**Organizational strand.** Each organization is coded on its own instrument, recorded in the codebook attached to this registration. Fields comprise: provenance and screening (identifier, originating frame or frames, block, admission mechanism, frame type, date identified, the lexicon proxy used to stratify the coding queue, outcome on each of C1 to C5, screening decision, first criterion failed, merge target, unit-resolution outcome and note, frame-operator flag, frames operated, operator status); organizational status (active / dormant / closed, with date and a dated evidence artifact); tier and label (tier; the self-applied phrase recorded verbatim; the lexicon term or terms matched; the URL, access date, placement of the phrase, and whether the organization is describing itself or quoting a funder, partner, or news source); self-descriptive phrases that match no term in the frozen lexicon, recorded verbatim, with the same evidence requirements as a lexicon hit; functional role (ecosystem role; named partner organizations); the five framework dimensions; and descriptive fields (name, headquarters, focus, projects, founding year, mission, staff expertise, contact, legal form, funding sources, technologies).
+
+The remaining paragraphs of this field — on the lexicon proxy's three values and its distinction from tier, and on the frozen lexicon and the verbatim-before-matching rule — are unchanged.
 
 ## Extraction stages — stage (1)
 
@@ -283,7 +285,7 @@ Before the full run, a calibration sample of approximately 100 records is screen
 
 **GROUP 3 — JUDGMENT-DEPENDENT FIELDS.** C3 (constitutive technology), C4 (public benefit), C5 (funder program), and the five framework dimensions.
 
-[Remainder of the Group 3 text unchanged.]
+> Coded by: both research assistants, independently, for every record. These fields are double-coded in full, not on a sample. Decided by: the lead reviewer, who adjudicates every disagreement, except on author-conflicted records, where the disagreement is reported unadjudicated (see Conflicts of Interest). Also coded by: the AI model (Role 3), independently and blind. Its output is withheld from both assistants and from the lead reviewer until the adjudicated human value has been recorded, and it never contributes to a coded value. It supports a separately reported human-to-AI agreement statistic and a targeted review pass over records where the model disagrees with both human coders or where all three diverge.
 
 ## Screening reliability — final paragraph of the organizational strand description
 
@@ -297,7 +299,9 @@ Ecosystem role is coded on the full instrument as registered but does not enter 
 
 ## Extraction reliability — organizational strand
 
-[Existing text, with "the four framework dimensions" replaced by "the five framework dimensions" in the enumeration of Group 3 fields.]
+Because the Group 3 fields are double-coded in full (see Screening Reliability), we compute and report Cohen's kappa between the two research assistants over all coded records for each of those fields — C3 (constitutive technology), C4 (public benefit), C5 (funder program), and the five framework dimensions — at the final calibration round, at the midpoint of coding, and at the end. Where a field's marginal distribution is too skewed for kappa to be interpretable, we additionally report percentage agreement.
+
+The remaining paragraphs of this field — on the 0.60 benchmark and the treatment of a field that fails it, on the calibration of organizational status, on the inductive category coding, on adjudication, and on AI validation in the organizational strand — are unchanged except as amended under Synthesis plan below.
 
 ## Data validation
 
@@ -317,11 +321,11 @@ Third, a comparison against the literature findings on the five framework dimens
 
 ## Synthesis plan — inductive coding
 
-[Existing text, with "with an agreement statistic computed on a subsample" replaced by "with agreement between the two research assistants computed over all pooled phrases and reported".]
+**Second, an inductive coding of self-descriptions, which answers the third clause of RQ5.** Self-descriptive phrases that match no term in the frozen lexicon are pooled across included records and coded into emergent categories in a second pass after charting is complete, with agreement between the two research assistants computed over all pooled phrases and reported. We report which categories recur across multiple organizations, whether each recurs within one block or cuts across blocks, and whether any is used by frame operators as well as by the organizations they recruit. A phrase used by a single organization is not reported as a category. Categories so identified are reported as results and are not added to the frozen lexicon. We state as a limitation that the absence of emergent categories cannot be distinguished from the frames having admitted only organizations whose vocabulary already fits.
 
 ## Expectations — (c)
 
-[Existing text, with "the configurations of the four framework dimensions" replaced by "the configurations of the five framework dimensions".]
+(c) Practitioner organizations' self-descriptions blur across the three traditions in identifiable and recurring ways rather than mapping cleanly onto them. This is registered as a structural claim, not a frequency claim: the organizational design does not license population-level proportions, so the expectation is not evaluated by how often blurring occurs in any population. It is evaluated from the inductive category coding and from the configurations of the five framework dimensions, asking whether a given blurred configuration recurs across multiple organizations and whether it appears in more than one block. "More than one block" means the configuration is present in each, not that its rate is compared between them, which the design does not license. The multi-frame subset provides supporting evidence where its minimum size is met (see Sensitivity analyses), but the expectation does not depend on it.
 
 ## Publication bias analyses
 
@@ -329,7 +333,7 @@ Not applicable in the quantitative sense: with no pooled effect sizes, funnel pl
 
 ## Miscellaneous screening details — AI-use disclosure
 
-[Existing text, with "Clause Opus 5" corrected to "Claude Opus 5".]
+AI-use disclosure (per RAISE 1 and RAISE 3, Responsible AI in Evidence Synthesis, 2025): We will use a large language model, Claude Opus 5, accessed via API with a fixed, archived prompt and default temperature settings, to recommend include/exclude decisions during title/abstract screening. It will be used as decision support only: every recommendation will be verified by a human reviewer who retains final authority, and the model will make no autonomous exclusions. Before the full run, we will validate it against blinded human screening on ~100 records and will report its recall/sensitivity and specificity with confidence intervals, together with the number of human-includes in the calibration sample; the full run will proceed only if recall meets our pre-specified threshold of ≥95%, and otherwise we will revise the prompt and criteria and repeat the pilot. No AI tool will be used for data extraction beyond the roles specified in the Extraction section, or for quality appraisal or synthesis decisions.
 
 ---
 
