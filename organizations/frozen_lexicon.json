@@ -1,20 +1,31 @@
 {
-  "_about": "Frozen self-identification lexicon for the TPG organizational strand. This file is the single authoritative copy. It is attached to the OSF registration and read at runtime by lexicon_proxy.py; the Codebook sheet of the protocol workbook records the same terms for coders.",
+  "_about": "Frozen self-identification lexicon for the TPG organizational strand. This file is the single authoritative copy: it is attached to the OSF registration, and lexicon_proxy.py (from script version 1.1.0) reads it at runtime rather than holding a copy of its own. The Codebook sheet of the protocol workbook records the same canonical terms for coders. Each run of the proxy writes the SHA-256 of this file into its run manifest, so the list a given run matched against can be verified against the deposited copy.",
   "_rules": [
     "Every term derives from the manuscript's own taxonomy section, so the instrument operationalizes the argument rather than importing vocabulary the study does not engage.",
     "This list is FROZEN. Do not add terms during collection. A term surfaced during the review that is absent from this list is a FINDING, recorded in nonlexicon_self_description and reported as a result.",
     "Patterns are surface variants counted as the same canonical term. They absorb spelling and spacing differences only, and never broaden the concept.",
     "Matching is case-insensitive. A match is a SAMPLING AID only: it is not the tier assignment, which requires the placement of the phrase and the identity of the speaker."
   ],
-  "version": "1.0",
+  "version": "1.1",
   "frozen_for": "TPG preregistration update",
   "term_count": 12,
+  "_revision_log": [
+    {
+      "version": "1.1",
+      "date": "2026-09-09",
+      "stage": "Before O2. The frame register is not frozen, no snapshot has been captured, no organization has been enumerated, screened or coded, and no page has been fetched by the proxy script.",
+      "change": "civic tech: separator made optional in both patterns, 'civic[\\\\s\\\\-]tech\\\\b' to 'civic[\\\\s\\\\-]?tech\\\\b' and likewise for the technolog(y|ies|ist|ists) variant.",
+      "effect": "The closed compound now matches: 'civictech' and 'CivicTech' previously matched no pattern at all, while 'civic tech' and 'civic-tech' did. The frame is published at civictech.guide, so the closed rendering is expected in the corpus.",
+      "rationale": "A spelling and spacing variant of a term already in the lexicon, admitted under rule 3 above. The canonical term, the concept, and the term count are unchanged, so the Codebook sheet needs no amendment. The companion term 'govtech' already matched with or without a separator ('\\\\bgov[\\\\s\\\\-]?tech\\\\b'); this brings 'civic tech' into line with it rather than treating the two compounds differently.",
+      "not_changed": "No term added, removed, or renamed. No other term's patterns altered. Terms whose renderings may also appear closed up — 'tech for good', 'data for good', 'AI for good' — were left as registered pending an explicit decision, because closing those would be a larger change than a single spelling variant."
+    }
+  ],
   "terms": [
     {
       "term": "civic tech",
       "patterns": [
-        "civic[\\s\\-]tech\\b",
-        "civic[\\s\\-]technolog(?:y|ies|ist|ists)\\b"
+        "civic[\\s\\-]?tech\\b",
+        "civic[\\s\\-]?technolog(?:y|ies|ist|ists)\\b"
       ]
     },
     {
