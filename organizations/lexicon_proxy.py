@@ -37,15 +37,19 @@ USAGE
     Input needs an id column and a URL column (defaults: org_id, website_url;
     override with --id-col / --url-col).
 
+    The lexicon is read from frozen_lexicon.json alongside this script, or
+    from the path given by --lexicon. It is not duplicated in this file.
+
     Responses are cached on disk, so re-running is cheap and does not re-hit
     sites. Delete the cache directory to force a clean re-fetch.
 
 REPRODUCIBILITY
     Every row records the URL requested, the final URL after redirects, the
     HTTP status, the fetch timestamp (UTC), the length of extracted text, and
-    the SHA-256 of that text. The run writes a sidecar JSON with the lexicon,
-    the pattern set, and the script version, so a reader can tell exactly what
-    was matched against.
+    the SHA-256 of that text. The run writes a sidecar JSON with the lexicon
+    as loaded, its declared version, the SHA-256 of the lexicon file itself,
+    and the script version, so a reader can tell exactly what was matched
+    against and can verify it against the copy deposited on OSF.
 """
 
 from __future__ import annotations
@@ -62,68 +66,92 @@ from pathlib import Path
 from urllib.parse import urlparse, urlunparse
 from urllib import robotparser
 
-SCRIPT_VERSION = "1.0.0"
+SCRIPT_VERSION = "1.1.0"
 
 # --------------------------------------------------------------------------
 # FROZEN LEXICON
 # --------------------------------------------------------------------------
-# These terms are frozen at registration and must match the codebook exactly.
-# Do not add terms here. A term surfaced during the review that is absent from
-# this list is a FINDING, recorded in nonlexicon_self_description and reported
-# as a result — not added to the lexicon mid-collection.
+# The lexicon is NOT defined in this file. It lives in frozen_lexicon.json,
+# which is the single authoritative copy: attached to the registration,
+# mirrored in the Codebook sheet for coders, and read here at runtime.
 #
-# Each canonical term maps to the surface variants counted as that term.
-# Variants exist only to absorb spelling and spacing differences, never to
-# broaden the concept.
+# A second copy in this script would agree with the file until the day it did
+# not, and a run would then match against a list no reader of the deposited
+# lexicon could see. There is deliberately no built-in fallback: if the file
+# is missing or malformed the run stops rather than proceeding on something
+# else.
+#
+# Do not add terms. A term surfaced during the review that is absent from the
+# file is a FINDING, recorded in nonlexicon_self_description and reported as a
+# result — not added to the lexicon mid-collection. Patterns are surface
+# variants of one canonical term; they absorb spelling and spacing differences
+# and never broaden the concept.
 
-LEXICON: dict[str, list[str]] = {
-    "civic tech": [
-        r"civic[\s\-]tech\b",
-        r"civic[\s\-]technolog(?:y|ies|ist|ists)\b",
-    ],
-    "public interest technology": [
-        r"public[\s\-]interest[\s\-]tech\b",
-        r"public[\s\-]interest[\s\-]technolog(?:y|ies|ist|ists)\b",
-    ],
-    "tech for good": [
-        r"tech(?:nology)?[\s\-]for[\s\-]good\b",
-    ],
-    "data for good": [
-        r"data[\s\-]for[\s\-]good\b",
-    ],
-    "data science / AI for social good": [
-        r"data[\s\-]science[\s\-]for[\s\-]social[\s\-]good\b",
-        r"\bAI[\s\-]for[\s\-]social[\s\-]good\b",
-        r"artificial[\s\-]intelligence[\s\-]for[\s\-]social[\s\-]good\b",
-        r"\bAI[\s\-]for[\s\-]good\b",
-    ],
-    "e-government": [
-        r"\be[\s\-]?government\b",
-    ],
-    "e-democracy": [
-        r"\be[\s\-]?democracy\b",
-    ],
-    "govtech": [
-        r"\bgov[\s\-]?tech\b",
-    ],
-    "open government": [
-        r"open[\s\-]government\b",
-    ],
-    "digital civics": [
-        r"digital[\s\-]civics\b",
-    ],
-    "crowd-civic systems": [
-        r"crowd[\s\-]civic[\s\-]systems?\b",
-    ],
-    "data activism": [
-        r"data[\s\-]activis(?:m|t|ts)\b",
-    ],
-}
+DEFAULT_LEXICON_PATH = Path(__file__).resolve().parent / "frozen_lexicon.json"
 
-COMPILED = {
-    term: [re.compile(p, re.IGNORECASE) for p in pats]
-    for term, pats in LEXICON.items()
-}
+
+def load_lexicon(path: Path) -> tuple[dict[str, list[str]], dict]:
+    """Read the frozen lexicon file.
+
+    Returns (canonical term -> list of patterns, provenance record). Every
+    failure below is fatal: silently degrading to a partial or built-in
+    lexicon is the exact failure this function exists to prevent.
+    """
+    try:
+        raw = path.read_bytes()
+    except OSError as exc:
+        sys.exit(f"cannot read lexicon file {path}: {exc}")
+
+    try:
+        doc = json.loads(raw.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        sys.exit(f"lexicon file {path} is not valid JSON: {exc}")
+
+    entries = doc.get("terms")
+    if not isinstance(entries, list) or not entries:
+        sys.exit(f"lexicon file {path} has no non-empty 'terms' list")
+
+    lexicon: dict[str, list[str]] = {}
+    for i, entry in enumerate(entries, 1):
+        if not isinstance(entry, dict):
+            sys.exit(f"lexicon entry {i} in {path} is not an object")
+        term = entry.get("term")
+        patterns = entry.get("patterns")
+        if not isinstance(term, str) or not term.strip():
+            sys.exit(f"lexicon entry {i} in {path} has no usable 'term'")
+        if not isinstance(patterns, list) or not patterns:
+            sys.exit(f"lexicon term {term!r} has no non-empty 'patterns' list")
+        if term in lexicon:
+            sys.exit(f"lexicon term {term!r} appears more than once in {path}")
+        for pat in patterns:
+            if not isinstance(pat, str):
+                sys.exit(f"lexicon term {term!r} has a non-string pattern")
+            try:
+                re.compile(pat)
+            except re.error as exc:
+                sys.exit(f"lexicon term {term!r}: pattern {pat!r} "
+                         f"does not compile: {exc}")
+        lexicon[term] = list(patterns)
+
+    declared = doc.get("term_count")
+    if isinstance(declared, int) and declared != len(lexicon):
+        sys.exit(f"lexicon file {path} declares term_count {declared} "
+                 f"but contains {len(lexicon)} terms")
+
+    provenance = {
+        "lexicon_file": str(path),
+        "lexicon_version": doc.get("version", ""),
+        "lexicon_term_count": len(lexicon),
+        "lexicon_sha256": hashlib.sha256(raw).hexdigest(),
+    }
+    return lexicon, provenance
+
+
+def compile_lexicon(lexicon: dict[str, list[str]]) -> dict:
+    return {
+        term: [re.compile(p, re.IGNORECASE) for p in pats]
+        for term, pats in lexicon.items()
+    }
 
 # A page yielding less than this many characters of extracted text is treated
 # as unread rather than as containing no lexicon term. JavaScript-rendered
@@ -255,10 +283,10 @@ def fetch(url: str, cache_dir: Path, robots_cache: dict,
 # --------------------------------------------------------------------------
 # Matching
 # --------------------------------------------------------------------------
-def match_lexicon(text: str) -> tuple[list[str], list[str]]:
+def match_lexicon(text: str, compiled: dict) -> tuple[list[str], list[str]]:
     """Return (canonical terms matched, verifying snippets)."""
     hits, snippets = [], []
-    for term, pats in COMPILED.items():
+    for term, pats in compiled.items():
         for pat in pats:
             m = pat.search(text)
             if m:
@@ -271,7 +299,7 @@ def match_lexicon(text: str) -> tuple[list[str], list[str]]:
     return hits, snippets
 
 
-def classify(rec: dict) -> tuple[str, list[str], list[str], str]:
+def classify(rec: dict, compiled: dict) -> tuple[str, list[str], list[str], str]:
     """Return (proxy, terms, snippets, reason)."""
     if rec.get("error"):
         return "UNDETERMINED", [], [], rec["error"]
@@ -280,7 +308,7 @@ def classify(rec: dict) -> tuple[str, list[str], list[str], str]:
         return ("UNDETERMINED", [], [],
                 f"insufficient_text:{len(text)}chars "
                 f"(likely JavaScript-rendered; determine by hand)")
-    hits, snips = match_lexicon(text)
+    hits, snips = match_lexicon(text, compiled)
     return ("TRUE" if hits else "FALSE"), hits, snips, ""
 
 
@@ -310,12 +338,22 @@ def main() -> None:
     ap.add_argument("--limit", type=int, default=0, help="process only N rows")
     ap.add_argument("--retry-undetermined", action="store_true",
                     help="clear cached failures and re-fetch those records")
+    ap.add_argument("--lexicon", default=str(DEFAULT_LEXICON_PATH),
+                    help="path to frozen_lexicon.json "
+                         "(default: alongside this script)")
     ap.add_argument("--print-lexicon", action="store_true",
                     help="print the frozen lexicon and patterns, then exit")
     args = ap.parse_args()
 
+    lexicon, lex_provenance = load_lexicon(Path(args.lexicon))
+    compiled = compile_lexicon(lexicon)
+
     if args.print_lexicon:
-        for term, pats in LEXICON.items():
+        print(f"{lex_provenance['lexicon_file']}  "
+              f"version {lex_provenance['lexicon_version'] or '(unversioned)'}  "
+              f"sha256 {lex_provenance['lexicon_sha256'][:16]}…  "
+              f"{lex_provenance['lexicon_term_count']} terms\n")
+        for term, pats in lexicon.items():
             print(f"{term}\n    " + "\n    ".join(pats))
         return
 
@@ -363,7 +401,7 @@ def main() -> None:
                    "http_status": "", "fetched_at": "", "text": ""}
         else:
             rec = fetch(url, cache_dir, robots_cache, args.delay, args.timeout)
-            proxy, terms, snips, reason = classify(rec)
+            proxy, terms, snips, reason = classify(rec, compiled)
 
         counts[proxy] += 1
         text = rec.get("text", "")
@@ -399,7 +437,8 @@ def main() -> None:
         "records": len(rows),
         "counts": counts,
         "min_text_chars": MIN_TEXT_CHARS,
-        "lexicon": LEXICON,
+        **lex_provenance,
+        "lexicon": lexicon,
     }, indent=2))
 
     n = len(rows) or 1
