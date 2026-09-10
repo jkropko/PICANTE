@@ -1,0 +1,71 @@
+{
+  "_about": "Field definitions for the organizational strand AI harness. Derived from sheet 4 (Codebook) and sheet 3 (Screening Rules) of TPG_org_strand_protocol_v3.xlsx. This file is the harness's single source of truth for field names and controlled values; run `python ai_harness.py check-codebook --workbook <path>` to verify it still agrees with the workbook. Do not hardcode any of this in the harness itself.",
+  "version": "0.1",
+  "quote_max_words": 25,
+
+  "role1": {
+    "fields": {
+      "screening_C1_unit":     {"kind": "single", "values": ["pass", "fail", "unresolvable", "undetermined"]},
+      "screening_C2_us":       {"kind": "single", "values": ["pass", "fail", "undetermined"]},
+      "unit_resolution_flag":  {"kind": "single", "values": ["resolved", "unit_unresolved", "undetermined"]},
+      "unit_resolution_note":  {"kind": "text", "evidence_required": false},
+      "status":                {"kind": "single", "values": ["active", "dormant", "closed", "undetermined"]},
+      "status_date":           {"kind": "date", "evidence_required": false},
+      "status_evidence":       {"kind": "text"},
+      "ecosystem_role":        {"kind": "multi", "values": ["practices", "funds", "studies", "trains", "convenes"]},
+      "org_form":              {"kind": "single", "values": ["nonprofit", "for profit", "government", "university", "ppp", "undetermined"]},
+      "technologies":          {"kind": "multi", "values": ["SE", "DS", "OD", "UX", "POL", "HW"]},
+      "partner_orgs_named":    {"kind": "multi", "values": null},
+      "name":                  {"kind": "text"},
+      "hq":                    {"kind": "text"},
+      "focus":                 {"kind": "text"},
+      "projects":              {"kind": "text"},
+      "founded":               {"kind": "text"},
+      "mission":               {"kind": "text"},
+      "expertise":             {"kind": "text"},
+      "contact":               {"kind": "text"},
+      "funding_sources":       {"kind": "text"}
+    },
+    "forbidden_fields": [
+      "screening_C3_constitutive", "screening_C4_public_benefit", "screening_C5_funder_program",
+      "tier", "self_label_verbatim", "self_label_lexicon_hit", "nonlexicon_self_description",
+      "who_participates", "who_benefits", "what_counts_as_social_good", "who_decides",
+      "what_counts_as_relevant_technology"
+    ],
+    "evidence_exempt_values": ["undetermined"]
+  },
+
+  "role2": {
+    "candidate_keys_required": ["source_id", "start", "end", "text_verbatim", "sentence_verbatim", "heading_context_verbatim"],
+    "candidate_keys_allowed_extra": [],
+    "max_candidates": 40,
+    "forbidden_key_substrings": ["tier", "lexicon", "placement", "speaker", "label", "term", "category", "categorial", "score", "rank", "confidence", "match", "type"]
+  },
+
+  "role3": {
+    "fields": {
+      "screening_C3_constitutive":  {"kind": "single", "values": ["pass", "fail", "undetermined"]},
+      "screening_C4_public_benefit": {"kind": "single", "values": ["pass", "fail", "undetermined"]},
+      "screening_C5_funder_program": {"kind": "single", "values": ["pass", "fail", "n_a", "undetermined"]},
+      "who_participates":                   {"kind": "rubric_pending"},
+      "who_benefits":                       {"kind": "rubric_pending"},
+      "what_counts_as_social_good":         {"kind": "rubric_pending"},
+      "who_decides":                        {"kind": "rubric_pending"},
+      "what_counts_as_relevant_technology": {"kind": "rubric_pending"}
+    },
+    "forbidden_fields": [
+      "screening_C1_unit", "screening_C2_us", "unit_resolution_flag", "status",
+      "tier", "self_label_verbatim", "self_label_lexicon_hit", "nonlexicon_self_description",
+      "ecosystem_role", "org_form", "technologies", "screening_decision"
+    ],
+    "evidence_exempt_values": ["undetermined", "n_a"],
+    "reasoning_required": true
+  },
+
+  "gates": {
+    "role1_field_accuracy": 0.95,
+    "role3_kappa_benchmark": 0.60,
+    "skewed_marginal_threshold": 0.85,
+    "skewed_percent_agreement_benchmark": 0.90
+  }
+}
