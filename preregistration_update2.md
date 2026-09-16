@@ -1,7 +1,7 @@
 # Preregistration Update 2 — Draft
 
 **Registration:** Technology for the Public Good (TPG) — scoping-informed meta-narrative review with a parallel organizational strand
-**Initial registration frozen:** 7/31/2026 · **Update 1 filed:** 8/19/2026 · **This update:** [DATE]
+**Initial registration frozen:** 7/31/2026 · **Update 1 filed:** 8/19/2026 · **This update:** 9/16/2026
 
 > Draft for review. Bracketed fields need completing before filing. Structure follows Update 1: assurance, then classed changes, then amended field text ready to paste into the OSF form.
 
@@ -152,7 +152,7 @@ The organizational-strand revision is a correction rather than a design change. 
 
 Two literature-strand durations are revised in the same recalculation. These two are not corrections: they follow from the pilot sizes registered under 2.6, which is a design change, and they appear here only so that the End date field is not left contradicting a change made elsewhere in this update. They are recorded in this item rather than in 2.6 because splitting a single registered field across two items would be worse than noting the mixed status here. The charting pilot rises from ten to twenty-five included sources, each charted both by a human blind to the AI and by the AI, and its duration is revised from approximately two weeks to approximately three to four weeks. The screening pilot remains at approximately 100 records in the ordinary case but may extend to a maximum of 250 where human-includes are sparse, and its duration is revised from approximately two weeks to approximately two to four weeks. No other stage duration changes.
 
-The planned end date is moved to [DATE] accordingly.
+The planned end date is moved to 9/16/2026 accordingly.
 
 Two further points are recorded so that the revised date is not read as a commitment the design cannot support. First, the organizational strand runs in parallel with the literature strand but is not independent of it: the strands meet at the Synthesis stage, so the later of the two governs. Second, the strand's critical path runs through adjudication by the lead reviewer, because the saturation counter advances only on adjudicated codes; a backlog in adjudication stalls coding regardless of research-assistant availability. Nothing in the protocol is time-boxed, and extending the schedule requires no further registration change.
 
@@ -339,7 +339,7 @@ We compare the traditions on five dimensions adapted from Arnstein's (1969) ladd
 
 ## End date
 
-Planned end date: [DATE].
+Planned end date: 9/16/2026.
 
 Three stage durations are revised; the rest are unchanged.
 
@@ -416,7 +416,7 @@ Records whose full text cannot be obtained are recorded as "not retrieved" rathe
 
 ## Miscellaneous search strategy details
 
-The 23-article seed set is frozen and attached to this registration and is the sole input to the citation-network expansion; the preliminary corpus assembled during exploratory work is set aside and not carried forward. The attached seed file was revised on [DATE] to correct transcription and formatting errors identified by verifying every record field by field against its source; the revision log accompanying the file records each correction, and the 23 works identified are unchanged. Both the original and revised files remain available on the OSF project. Different citation indices have genuinely different coverage, so the resulting corpus is partly a function of the chosen index; this is acknowledged as a limitation.
+The 23-article seed set is frozen and attached to this registration and is the sole input to the citation-network expansion; the preliminary corpus assembled during exploratory work is set aside and not carried forward. The attached seed file was revised on 9/16/2026 to correct transcription and formatting errors identified by verifying every record field by field against its source; the revision log accompanying the file records each correction, and the 23 works identified are unchanged. Both the original and revised files remain available on the OSF project. Different citation indices have genuinely different coverage, so the resulting corpus is partly a function of the chosen index; this is acknowledged as a limitation.
 
 Three properties of the seed set are recorded here because they shape the corpus. First, three seeds are preprints and one is CEUR-WS proceedings. The frozen identifier remains the input to the expansion for the duration of the review regardless of subsequent publication. Where a seed is published during the review, the publication is recorded in the seed file with its date and identifier, the published version is treated as the citable form in the write-up, and whether the index merges the preprint and published records is checked and reported; where it does not, the forward-citation set retrieved from the frozen identifier is reported as incomplete for that seed and its leave-one-out result is read against that fact. The seed set is not re-frozen and no seed is substituted.
 
