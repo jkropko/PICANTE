@@ -4,6 +4,7 @@ Turns the frozen frame snapshots into a deduplicated candidate pool of organizat
 
 | File | What it is |
 | --- | --- |
+| `capture_log.py` | O2 close-out: hashes the snapshots, logs the capture, writes `sources.json` |
 | `enumerate_o3.py` | CLI: inspect, enumerate, dedupe-candidates, apply-merges, prisma |
 | `frames_io.py` | One reader per frame shape; applies each registered boundary |
 | `dedupe.py` | Cross-frame candidate generation, merge application, org_id assignment |
@@ -14,12 +15,23 @@ Turns the frozen frame snapshots into a deduplicated candidate pool of organizat
 
 ```
 python test_enumerate_o3.py
-python enumerate_o3.py inspect --frame CFA --file snapshots/organizations.json
+python capture_log.py log --snapshots snapshots --as-of 2026-10-01
+python enumerate_o3.py inspect --frame CFA --file snapshots/CFA/organizations.json
 python enumerate_o3.py enumerate --sources sources.json --out run
 python enumerate_o3.py dedupe-candidates
 python enumerate_o3.py apply-merges
 python enumerate_o3.py prisma
 ```
+
+## O2 — closing out the capture
+
+Lay the snapshots out one directory per frame code. A directory holding one data file needs nothing else; a directory holding several needs a `primary.txt` naming the file `enumerate` should read, because guessing which export is the frame of record is not a decision a script should make. Drop the archive URL in `wayback.txt`, one per line. For CFA, clone the repo into the directory — the commit SHA is read from the working tree rather than typed.
+
+`log` hashes every file, reads the CFA commit, counts rows, checks each frame against the register's size estimate, and writes `capture_log.json` plus a `sources.json` already pointed at the right files. It exits non-zero on a missing frame, an ambiguous primary, or a CFA capture with no commit SHA.
+
+The size check is a warning, never a refusal — a count outside the estimate may mean the frame moved since the register was written, which is a finding, or that the wrong file was saved, which is a mistake, and the script cannot tell which. The one it is most worth heeding is CTFG: a count in the low thousands almost always means the boundary filter was applied at capture, which leaves the two O8 audit pools with nothing to draw from.
+
+`verify` re-hashes against the log later, so before O3 you can confirm nothing moved between the freeze and the enumeration. `enumerate` hashes its inputs again into `run_manifest.json`, so the two can be compared after the fact as well.
 
 ## The three things the script will not do
 
