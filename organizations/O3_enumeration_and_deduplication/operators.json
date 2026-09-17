@@ -1,0 +1,28 @@
+{
+  "_about": "Rule 2 frame operators. Every organization that operates, convenes or publishes a frame used in this study enters the candidate pool BY CONSTRUCTION, independent of whether it appears in any frame's listings. Operators are screened on C1-C5 and coded on the full instrument like any other record, are flagged frame_operator = TRUE, and are EXCLUDED from every within-block rate and from the saturation count, because their inclusion is guaranteed rather than sampled.",
+  "_blocking": "The enumerator REFUSES TO RUN while any entry below has decision = UNDECIDED. Operators enter the pool at O3, so the list must be closed before enumeration, not during it.",
+
+  "settled": [
+    {"name": "PIT University Network", "frame_operated": "PITUN", "operator_status": "current", "website_url": "https://pit-un.org"},
+    {"name": "Ford Foundation", "frame_operated": "FORD", "operator_status": "current", "website_url": "https://www.fordfoundation.org"},
+    {"name": "New America", "frame_operated": "PITUN", "operator_status": "current", "website_url": "https://www.newamerica.org", "note": "Co-convener of PIT-UN with Ford and Hewlett, 2019. Enters as a co-convener of a frame in use, not as an operator of the dropped NAPIT frame."},
+    {"name": "Civic Tech Field Guide", "frame_operated": "CTFG", "operator_status": "current", "website_url": "https://civictech.guide"},
+    {"name": "Alliance of Civic Technologists", "frame_operated": "ACT", "operator_status": "current", "website_url": "https://civictechnologists.org", "author_conflict": true, "note": "AUTHOR-CONFLICTED. The lead author participates in ACT. Routed away from him entirely at screening, coding, adjudication and review; both RAs code it independently and any disagreement is reported unadjudicated."},
+    {"name": "Code for America", "frame_operated": "CFA", "operator_status": "historical", "website_url": "https://codeforamerica.org", "note": "Brigade Network sunset June 2023. The frame is historical; the organization is not."},
+    {"name": "Fast Forward", "frame_operated": "FF", "operator_status": "current", "website_url": "https://www.ffwd.org"},
+    {"name": "Patrick J. McGovern Foundation", "frame_operated": "MCGV", "operator_status": "current", "website_url": "https://www.mcgovern.org"},
+    {"name": "Google.org", "frame_operated": "GORG", "operator_status": "current", "website_url": "https://www.google.org"}
+  ],
+
+  "undecided": [
+    {"name": "Schmidt Sciences", "decision": "UNDECIDED", "operates": "SCHM (dropped, sheet 8 item 7)", "for": "Listed as an operator in workbook sheet 3.", "against": "Dropped for being the WRONG TRADITION — fundamental science, not technology applied to social problems. Coding it as a TPG organization would be odd, and the registration's scope is operators of frames USED in this study."},
+    {"name": "Knight Foundation", "decision": "UNDECIDED", "operates": "KNIGHT (dropped, sheet 8 item 5)", "for": "Listed as an operator in workbook sheet 3; Code for America's first funder, historically central to civic technology.", "against": "Its frame was dropped, so it operates no frame in use."},
+    {"name": "Data Science for Social Good", "decision": "UNDECIDED", "operates": "DSSG (considered, not used)", "for": "Listed as an operator in workbook sheet 3; also the worked example under Rule 1, where it is logged as unit_known_not_surfaced via PITUN.", "against": "Its frame was considered and rejected."},
+    {"name": "DataKind", "decision": "UNDECIDED", "operates": "DataKind chapters (considered, not used)", "for": "Listed as an operator in workbook sheet 3; ran the 2019 Google.org AI Impact Challenge jointly, so it touches a frame in use.", "against": "Its own frame was rejected as not enumerable."},
+    {"name": "National Digital Inclusion Alliance", "decision": "UNDECIDED", "operates": "NDIA affiliates (considered, not used)", "for": "Listed as an operator in workbook sheet 3.", "against": "Its frame was rejected; sheet 2 notes it may enter via FORD if it qualifies, which would make it an ordinary sampled record rather than an operator."},
+    {"name": "NetGain Partnership", "decision": "UNDECIDED", "operates": "NetGain (considered, not used)", "for": "Listed as an operator in workbook sheet 3 as a historical operator.", "against": "Its frame was rejected; roster is the 2015 founding membership with no evidence of activity after March 2024."}
+  ],
+
+  "_how_to_settle": "For each entry in `undecided`, set decision to IN or OUT and add a dated note. Move IN entries into `settled` with frame_operated, operator_status and website_url filled in. Then clean the originating_frame controlled values in codebook sheet 4: drop NAPIT, KNIGHT and SCHM unless the corresponding organization is retained here as an operator record.",
+  "_recommendation": "On the registration's own wording — operators of frames used in this study — all six are OUT, and Schmidt most clearly so. This is recorded as a reading of the registered scope, not as a decision; the decision is the lead reviewer's and must be dated."
+}

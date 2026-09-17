@@ -1,0 +1,179 @@
+{
+  "_about": "Frame configuration for O3 enumeration. Codes, blocks, admission mechanisms and frame types are fixed by the frozen register (sheet 2 of the protocol workbook) and must not be edited here. The `columns` and `tags` blocks are NOT registered: they map this config onto whatever the frozen snapshot files actually look like, and must be confirmed against those files with `python enumerate_o3.py inspect` before the first real run. Every value below marked CONFIRM is a placeholder.",
+  "_registered": "Frame codes, block, admission_mechanism, frame_type, boundary. Do not change without a preregistration update.",
+  "_not_registered": "Column names, tag vocabulary, file paths. Change freely to match the snapshots.",
+
+  "as_of": null,
+  "_as_of_note": "The single register freeze date, ISO. Set once, before enumeration, chosen without reference to any frame's contents. Written to date_identified on every record.",
+
+  "frames": {
+    "PITUN": {
+      "name": "PIT University Network member roster",
+      "block": "A",
+      "admission_mechanism": "self_declaration",
+      "frame_type": "identity",
+      "reader": "generic",
+      "lists_institutions": true,
+      "_institutions_note": "PIT-UN lists universities. Rule 1 applies to every record: it resolves to the unit the frame itself names, and the parent institution does not enter the sample. Every record is emitted with unit_resolution_flag = PENDING for human resolution.",
+      "columns": {
+        "name": "CONFIRM",
+        "website_url": "CONFIRM",
+        "location": "CONFIRM",
+        "listing_text": "CONFIRM"
+      }
+    },
+    "FORD": {
+      "name": "Ford Foundation Technology and Society grantees",
+      "block": "A",
+      "admission_mechanism": "selection",
+      "frame_type": "funder_portfolio",
+      "reader": "grants",
+      "lists_institutions": true,
+      "_two_source": "Live topic-filtered database (active grants) plus 990-PF filings from 2011. Record which source each grantee came from in source_route; the reader requires that column and refuses a file without it.",
+      "columns": {
+        "grantee_name": "CONFIRM",
+        "website_url": "CONFIRM",
+        "location": "CONFIRM",
+        "source_route": "CONFIRM",
+        "fiscal_sponsor": null,
+        "listing_text": "CONFIRM"
+      }
+    },
+    "CTFG": {
+      "name": "Civic Tech Field Guide, US organizations",
+      "block": "B",
+      "admission_mechanism": "self_declaration",
+      "frame_type": "identity",
+      "reader": "ctfg",
+      "lists_institutions": false,
+      "boundary": {
+        "type_contains": "organization",
+        "country_in": ["united states"],
+        "country_missing_included": true,
+        "_registered": "Type contains 'Organization' AND (country = United States OR country missing). Expect ~1,099 candidates: 623 US-confirmed plus 476 requiring manual country determination at O4."
+      },
+      "columns": {
+        "name": "CONFIRM",
+        "website_url": "CONFIRM",
+        "type": "CONFIRM",
+        "country": "CONFIRM",
+        "networks": "CONFIRM",
+        "added": "CONFIRM",
+        "last_modified": "CONFIRM",
+        "listing_text": null
+      }
+    },
+    "ACT": {
+      "name": "Alliance of Civic Technologists member list",
+      "block": "B",
+      "admission_mechanism": "self_declaration",
+      "frame_type": "coalition",
+      "reader": "generic",
+      "lists_institutions": false,
+      "columns": {
+        "name": "CONFIRM",
+        "website_url": "CONFIRM",
+        "location": "CONFIRM",
+        "listing_text": null
+      }
+    },
+    "CFA": {
+      "name": "Code for America brigades (archived)",
+      "block": "B",
+      "admission_mechanism": "self_declaration",
+      "frame_type": "identity",
+      "reader": "cfa",
+      "lists_institutions": false,
+      "_pin": "organizations.json pinned to a commit SHA, not a date. Record the SHA in the manifest.",
+      "tags": {
+        "include_any": ["Brigade"],
+        "exclude_any": ["Code for All", "Government"],
+        "independence_tags": ["Official", "Partner", "Fiscally Sponsored"],
+        "_confirm": "Tag vocabulary is NOT confirmed. Run `inspect --frame CFA` against the pinned file to print the full tag inventory with counts, then set these lists. The register notes 221 records of which 181 carry a Brigade tag, and that the file also holds 18F, Code for All members, German OK Labs, Code for Poland and government entities."
+      },
+      "boundary": {
+        "location_rule": "drop_clearly_non_us",
+        "_location_rule_note": "DEFAULT AND FLAGGED FOR YOUR DECISION. 'drop_clearly_non_us' keeps records whose location reads US or cannot be determined, and drops only those a location string positively identifies as non-US. This mirrors CTFG, whose registered boundary deliberately retains country-missing records so that C2 — a human determination at O4 — decides them rather than a string match at enumeration. The alternative, 'keep_us_only', drops UNKNOWN too and matches the register's '~125 US (of 221)' estimate more literally, but pre-empts C2 on every record with a messy city string. Set this before the first real run; it changes the enumerated count and cannot be revisited afterwards without re-enumerating."
+      },
+      "columns": {
+        "name": "name",
+        "website_url": "website",
+        "location": "city",
+        "tags": "tags",
+        "previous_names": "previous_names",
+        "listing_text": null
+      }
+    },
+    "FF": {
+      "name": "Fast Forward portfolio",
+      "block": "C",
+      "admission_mechanism": "selection",
+      "frame_type": "accelerator",
+      "reader": "generic",
+      "lists_institutions": false,
+      "columns": {
+        "name": "CONFIRM",
+        "website_url": "CONFIRM",
+        "location": "CONFIRM",
+        "listing_text": null
+      }
+    },
+    "MCGV": {
+      "name": "Patrick J. McGovern Foundation grantees",
+      "block": "C",
+      "admission_mechanism": "selection",
+      "frame_type": "funder_portfolio",
+      "reader": "grants",
+      "lists_institutions": false,
+      "_unit": "The unit in this source is GRANTS, not organizations (register: 795 grants, relationships averaging 3-7 each). The reader deduplicates to organizations within the frame and records grant_count. Some grants route via fiscal sponsors, so the named grantee may be the sponsor.",
+      "columns": {
+        "grantee_name": "CONFIRM",
+        "website_url": "CONFIRM",
+        "location": "CONFIRM",
+        "source_route": null,
+        "fiscal_sponsor": "CONFIRM",
+        "listing_text": "CONFIRM"
+      }
+    },
+    "GORG": {
+      "name": "Google.org, four named cohorts",
+      "block": "C",
+      "admission_mechanism": "selection",
+      "frame_type": "corporate_philanthropy",
+      "reader": "generic",
+      "lists_institutions": false,
+      "cohorts": {
+        "allowed": [
+          "2019 AI Impact Challenge",
+          "2025 Google.org Accelerator: Generative AI",
+          "2026 Impact Challenge: AI for Government Innovation",
+          "2026 Impact Challenge: AI for Science"
+        ],
+        "pending": [
+          "2026 Impact Challenge: AI for Science"
+        ],
+        "_pending_note": "Checked 2026-09-16: the AI for Government Innovation recipient list published 2026-09-15 and is capturable. The AI for Science page reads 'Applications are now closed' with no recipient list. Record AI for Science as pending, enumerate it when its list publishes, and record THAT date in enumerated_on rather than as_of. If it has not published by the close of coding, report the cohort as unenumerated and analyze the frame without it.",
+        "_trap": "The AI for Science page carries six organizations under 'Previously funded recipients'. Those belong to the earlier inaugural AI for Science fund, which is NOT one of the four named cohorts. The reader rejects any row whose cohort value is not in `allowed`, which is what stops them entering the frame.",
+        "_closed_list": "Cohorts announced after the freeze date do not enter the frame regardless of when they are announced."
+      },
+      "columns": {
+        "name": "CONFIRM",
+        "website_url": "CONFIRM",
+        "location": "CONFIRM",
+        "cohort": "CONFIRM",
+        "listing_text": null
+      }
+    }
+  },
+
+  "ctfg_audit_pools": {
+    "_about": "O8 draws two boundary-audit samples from CTFG records OUTSIDE the frame boundary. Those pools only exist if the FULL export is captured at freeze, not the filtered subset. The enumerator writes both pools at O3 so they are fixed in the frozen state; O8 draws from these files with its own recorded seed.",
+    "stratum_a": {
+      "rule": "country is United States AND type is PRESENT AND type does not contain 'organization'",
+      "_note": "Per workbook v4: 'type present and not Organization'. Read as merely 'not typed Organization' this stratum would contain stratum (b) entirely and the two samples would not be independent."
+    },
+    "stratum_b": {
+      "rule": "country is United States AND type is MISSING"
+    }
+  }
+}
