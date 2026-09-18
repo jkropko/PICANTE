@@ -2,10 +2,24 @@
   "_about": "Frame configuration for O3 enumeration. Codes, blocks, admission mechanisms and frame types are fixed by the frozen register (sheet 2 of the protocol workbook) and must not be edited here. The `columns` and `tags` blocks are NOT registered: they map this config onto whatever the frozen snapshot files actually look like, and must be confirmed against those files with `python enumerate_o3.py inspect` before the first real run. Every value below marked CONFIRM is a placeholder.",
   "_registered": "Frame codes, block, admission_mechanism, frame_type, boundary. Do not change without a preregistration update.",
   "_not_registered": "Column names, tag vocabulary, file paths. Change freely to match the snapshots.",
-
+  "_decisions": {
+    "_about": "Decisions recorded here are the lead reviewer's, made before any frame was captured, any snapshot taken, or any organization enumerated. They are config choices the registration leaves to execution, not amendments to it.",
+    "cfa_location_rule": {
+      "decided_on": "2026-09-16",
+      "value": "drop_clearly_non_us",
+      "summary": "CFA records with an undeterminable location stay in the frame; C2 decides them at O4. See frames.CFA.boundary."
+    },
+    "rule_2_operator_list": {
+      "decided_on": "2026-09-16",
+      "summary": "Closed at nine operators. All six contested entries OUT; none operates a frame used in this study. See config/operators.json and protocol v5 sheet 3."
+    },
+    "register_freeze_date": {
+      "decided_on": null,
+      "summary": "STILL OPEN. One date for all eight frames, chosen without reference to the contents of any frame and recorded before capture. Set `as_of` below. Window August 2026 to January 2027. As of 2026-09-16: the Google.org AI for Government Innovation cohort published its recipients on 15 September 2026 and is capturable; AI for Science has not published and is recorded as pending."
+    }
+  },
   "as_of": null,
   "_as_of_note": "The single register freeze date, ISO. Set once, before enumeration, chosen without reference to any frame's contents. Written to date_identified on every record.",
-
   "frames": {
     "PITUN": {
       "name": "PIT University Network member roster",
@@ -48,7 +62,9 @@
       "lists_institutions": false,
       "boundary": {
         "type_contains": "organization",
-        "country_in": ["united states"],
+        "country_in": [
+          "united states"
+        ],
         "country_missing_included": true,
         "_registered": "Type contains 'Organization' AND (country = United States OR country missing). Expect ~1,099 candidates: 623 US-confirmed plus 476 requiring manual country determination at O4."
       },
@@ -86,14 +102,27 @@
       "lists_institutions": false,
       "_pin": "organizations.json pinned to a commit SHA, not a date. Record the SHA in the manifest.",
       "tags": {
-        "include_any": ["Brigade"],
-        "exclude_any": ["Code for All", "Government"],
-        "independence_tags": ["Official", "Partner", "Fiscally Sponsored"],
+        "include_any": [
+          "Brigade"
+        ],
+        "exclude_any": [
+          "Code for All",
+          "Government"
+        ],
+        "independence_tags": [
+          "Official",
+          "Partner",
+          "Fiscally Sponsored"
+        ],
         "_confirm": "Tag vocabulary is NOT confirmed. Run `inspect --frame CFA` against the pinned file to print the full tag inventory with counts, then set these lists. The register notes 221 records of which 181 carry a Brigade tag, and that the file also holds 18F, Code for All members, German OK Labs, Code for Poland and government entities."
       },
       "boundary": {
         "location_rule": "drop_clearly_non_us",
-        "_location_rule_note": "DEFAULT AND FLAGGED FOR YOUR DECISION. 'drop_clearly_non_us' keeps records whose location reads US or cannot be determined, and drops only those a location string positively identifies as non-US. This mirrors CTFG, whose registered boundary deliberately retains country-missing records so that C2 — a human determination at O4 — decides them rather than a string match at enumeration. The alternative, 'keep_us_only', drops UNKNOWN too and matches the register's '~125 US (of 221)' estimate more literally, but pre-empts C2 on every record with a messy city string. Set this before the first real run; it changes the enumerated count and cannot be revisited afterwards without re-enumerating."
+        "_decided": "DECISION by the lead reviewer, 2026-09-16, before any frame was captured. Records whose location reads US, and records whose location cannot be determined from the roster's city string, stay inside the frame. Only records a location string positively identifies as non-US are dropped at enumeration.",
+        "_why": "C2 is a human determination made at O4 from the organization's own materials, and it exists precisely because frame location metadata is unreliable. The CTFG boundary already embodies that: it deliberately retains country-missing records rather than letting an absent field decide them. Applying the same logic to CFA keeps the registered division of labour intact \u2014 the boundary decides what the frame contains, a person decides whether an organization is US-based \u2014 instead of letting a string match at enumeration pre-empt a criterion assigned to a coder.",
+        "_what_it_costs": "The enumerated count will exceed the register's '~125 US (of 221)' estimate, which assumed a US filter at enumeration. That estimate was written before anyone parsed the city strings and is not a commitment; the count is reported either way and every boundary drop is logged. Each retained UNKNOWN record costs one manual C2 determination at O4, which is small beside the several hundred CTFG records already needing the same treatment.",
+        "_what_it_protects": "A brigade with a messy or missing city string is likely a small volunteer group with a thin web presence \u2014 the tier-2 organizations that do the work without the field vocabulary, which the draw rule goes out of its way to reach before sampling can stop. Dropping them at enumeration would remove them before the stratification that exists to find them.",
+        "_alternative_not_taken": "keep_us_only would drop undeterminable records too. Still implemented and still switchable, but changing it after enumeration requires re-enumerating, because it changes what the frame contains."
       },
       "columns": {
         "name": "name",
@@ -165,7 +194,6 @@
       }
     }
   },
-
   "ctfg_audit_pools": {
     "_about": "O8 draws two boundary-audit samples from CTFG records OUTSIDE the frame boundary. Those pools only exist if the FULL export is captured at freeze, not the filtered subset. The enumerator writes both pools at O3 so they are fixed in the frozen state; O8 draws from these files with its own recorded seed.",
     "stratum_a": {
