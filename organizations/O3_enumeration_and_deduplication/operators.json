@@ -1,5 +1,133 @@
 {
   "_about": "Rule 2 frame operators. Every organization that operates, convenes or publishes a frame used in this study enters the candidate pool BY CONSTRUCTION, independent of whether it appears in any frame's listings. Operators are screened on C1-C5 and coded on the full instrument like any other record, are flagged frame_operator = TRUE, and are EXCLUDED from every within-block rate and from the saturation count, because their inclusion is guaranteed rather than sampled.",
+  "_blocking": "The enumerator refuses to run while any entry in `undecided` reads UNDECIDED. As of 2026-09-16 none does, so this file no longer blocks enumeration.",
+  "settled": [
+    {
+      "name": "PIT University Network",
+      "frame_operated": "PITUN",
+      "operator_status": "current",
+      "website_url": "https://pit-un.org"
+    },
+    {
+      "name": "Ford Foundation",
+      "frame_operated": "FORD",
+      "operator_status": "current",
+      "website_url": "https://www.fordfoundation.org"
+    },
+    {
+      "name": "New America",
+      "frame_operated": "PITUN",
+      "operator_status": "current",
+      "website_url": "https://www.newamerica.org",
+      "note": "Co-convener of PIT-UN with Ford and Hewlett, 2019. Enters as a co-convener of a frame in use, not as an operator of the dropped NAPIT frame."
+    },
+    {
+      "name": "Civic Tech Field Guide",
+      "frame_operated": "CTFG",
+      "operator_status": "current",
+      "website_url": "https://civictech.guide"
+    },
+    {
+      "name": "Alliance of Civic Technologists",
+      "frame_operated": "ACT",
+      "operator_status": "current",
+      "website_url": "https://civictechnologists.org",
+      "author_conflict": true,
+      "note": "AUTHOR-CONFLICTED. The lead author participates in ACT. Routed away from him entirely at screening, coding, adjudication and review; both RAs code it independently and any disagreement is reported unadjudicated."
+    },
+    {
+      "name": "Code for America",
+      "frame_operated": "CFA",
+      "operator_status": "historical",
+      "website_url": "https://codeforamerica.org",
+      "note": "Brigade Network sunset June 2023. The frame is historical; the organization is not."
+    },
+    {
+      "name": "Fast Forward",
+      "frame_operated": "FF",
+      "operator_status": "current",
+      "website_url": "https://www.ffwd.org"
+    },
+    {
+      "name": "Patrick J. McGovern Foundation",
+      "frame_operated": "MCGV",
+      "operator_status": "current",
+      "website_url": "https://www.mcgovern.org"
+    },
+    {
+      "name": "Google.org",
+      "frame_operated": "GORG",
+      "operator_status": "current",
+      "website_url": "https://www.google.org"
+    }
+  ],
+  "undecided": [
+    {
+      "name": "Schmidt Sciences",
+      "decision": "OUT",
+      "operates": "SCHM (dropped, sheet 8 item 7)",
+      "for": "Listed as an operator in workbook sheet 3.",
+      "against": "Dropped for being the WRONG TRADITION \u2014 fundamental science, not technology applied to social problems. Coding it as a TPG organization would be odd, and the registration's scope is operators of frames USED in this study.",
+      "decided_on": "2026-09-16",
+      "decided_by": "lead reviewer",
+      "reason": "OUT. Operates no frame used in this study. Its portfolio was considered as a frame and rejected for being the wrong tradition \u2014 fundamental science rather than technology applied to social problems \u2014 so coding it as a TPG organization would be odd on its face."
+    },
+    {
+      "name": "Knight Foundation",
+      "decision": "OUT",
+      "operates": "KNIGHT (dropped, sheet 8 item 5)",
+      "for": "Listed as an operator in workbook sheet 3; Code for America's first funder, historically central to civic technology.",
+      "against": "Its frame was dropped, so it operates no frame in use.",
+      "decided_on": "2026-09-16",
+      "decided_by": "lead reviewer",
+      "reason": "OUT. Operates no frame used in this study. Its portfolio was considered and rejected: technology giving is diffuse across program areas with no standing technology portfolio to enumerate."
+    },
+    {
+      "name": "Data Science for Social Good",
+      "decision": "OUT",
+      "operates": "DSSG (considered, not used)",
+      "for": "Listed as an operator in workbook sheet 3; also the worked example under Rule 1, where it is logged as unit_known_not_surfaced via PITUN.",
+      "against": "Its frame was considered and rejected.",
+      "decided_on": "2026-09-16",
+      "decided_by": "lead reviewer",
+      "reason": "OUT. Operates no frame used in this study. Treated on the same terms as any other organization, which means its existing Rule 1 treatment stands unchanged: PIT-UN does not name it, so it remains logged as unit_known_not_surfaced, counted, and available for sensitivity check (h). Admitting it as an operator would have pulled it into the pool by construction and hollowed out the worked example the rule depends on."
+    },
+    {
+      "name": "DataKind",
+      "decision": "OUT",
+      "operates": "DataKind chapters (considered, not used)",
+      "for": "Listed as an operator in workbook sheet 3; ran the 2019 Google.org AI Impact Challenge jointly, so it touches a frame in use.",
+      "against": "Its own frame was rejected as not enumerable.",
+      "decided_on": "2026-09-16",
+      "decided_by": "lead reviewer",
+      "reason": "OUT. The one case with a real argument on the other side: DataKind co-ran the 2019 AI Impact Challenge with Google.org, and that cohort IS one of the four GORG cohorts enumerated here, so it had a claim to operating a frame in use. Resolved to OUT by the lead reviewer, treating DataKind on the same terms as any other organization. It may well enter through FF or MCGV, and a record admitted that way counts toward within-block rates and saturation, which an operator record does not."
+    },
+    {
+      "name": "National Digital Inclusion Alliance",
+      "decision": "OUT",
+      "operates": "NDIA affiliates (considered, not used)",
+      "for": "Listed as an operator in workbook sheet 3.",
+      "against": "Its frame was rejected; sheet 2 notes it may enter via FORD if it qualifies, which would make it an ordinary sampled record rather than an operator.",
+      "decided_on": "2026-09-16",
+      "decided_by": "lead reviewer",
+      "reason": "OUT. Operates no frame used in this study. Its affiliate list was examined and judged not enumerable for this purpose \u2014 hundreds of affiliates, largely libraries and community centers, a digital-inclusion population rather than a technology-building one. May plausibly enter through FORD as an ordinary sampled record."
+    },
+    {
+      "name": "NetGain Partnership",
+      "decision": "OUT",
+      "operates": "NetGain (considered, not used)",
+      "for": "Listed as an operator in workbook sheet 3 as a historical operator.",
+      "against": "Its frame was rejected; roster is the 2015 founding membership with no evidence of activity after March 2024.",
+      "decided_on": "2026-09-16",
+      "decided_by": "lead reviewer",
+      "reason": "OUT. Operates no frame used in this study. Its roster is the 2015 founding membership with no evidence of activity after March 2024."
+    }
+  ],
+  "_status": "CLOSED 2026-09-16, before any frame was captured, any snapshot taken, or any organization enumerated. Nine operators enter by construction (see `settled`). All six contested entries are OUT (see `undecided`, retained with their reasoning rather than deleted, so the decision is auditable). The registered test is whether an organization operates a frame USED in this study; none of the six does.",
+  "_not_exclusion_from_the_study": "Removal from this list is not exclusion from the study. Each of the six enters the candidate pool on the same terms as any other organization if one of the eight frames surfaces it. A record admitted that way is analytically stronger than an operator record: operator records are excluded from every within-block rate and from the saturation count, because their inclusion is guaranteed rather than sampled, while a sampled record counts toward both.",
+  "_codebook_conformed": "Consequential edit applied in protocol v5 on the same date: originating_frame in codebook sheet 4 drops NAPIT, KNIGHT and SCHM \u2014 no frame of those names is in the register and, with this list closed, no record can carry them \u2014 and gains OPERATOR and PROBE."
+}{
+  "_about": "Rule 2 frame operators. Every organization that operates, convenes or publishes a frame used in this study enters the candidate pool BY CONSTRUCTION, independent of whether it appears in any frame's listings. Operators are screened on C1-C5 and coded on the full instrument like any other record, are flagged frame_operator = TRUE, and are EXCLUDED from every within-block rate and from the saturation count, because their inclusion is guaranteed rather than sampled.",
   "_blocking": "The enumerator REFUSES TO RUN while any entry below has decision = UNDECIDED. Operators enter the pool at O3, so the list must be closed before enumeration, not during it.",
 
   "settled": [
