@@ -14,11 +14,30 @@
       "summary": "Closed at nine operators. All six contested entries OUT; none operates a frame used in this study. See config/operators.json and protocol v5 sheet 3."
     },
     "register_freeze_date": {
+      "decided_on": null,
+      "summary": "STILL OPEN. One date for all eight frames, chosen without reference to the contents of any frame and recorded before capture. Set `as_of` below. Window August 2026 to January 2027. As of 2026-09-16: the Google.org AI for Government Innovation cohort published its recipients on 15 September 2026 and is capturable; AI for Science has not published and is recorded as pending."
+    },
+    "ford_990pf_source": {
       "decided_on": "2026-09-23",
-      "summary": "Closed as of 2026-09-23. One date for all eight frames, chosen without reference to the contents of any frame and recorded before capture. Set `as_of` below. Window August 2026 to January 2027. As of 2026-09-16: the Google.org AI for Government Innovation cohort published its recipients on 15 September 2026 and is capturable; AI for Science has not published and is recorded as pending."
+      "value": "dropped",
+      "summary": "FORD is enumerated from the live database alone. The register's reason for the 990-PF tail \u2014 that the database shows only active grants \u2014 is disproved by a capture spanning 2011-2026. See notes.txt \u00a75."
+    },
+    "ford_enumeration_route": {
+      "decided_on": "2026-09-23",
+      "value": "rendered HTML documents, unfiltered; boundary applied at enumeration",
+      "summary": "The registered topic-filtered export does not exist and no program filter is available at any layer. See notes.txt \u00a71-2."
+    },
+    "ford_boundary": {
+      "decided_on": "2026-09-23",
+      "value": "program OR technology subject",
+      "summary": "~618 grants rather than 338. Ford tags 80 current technology grants outside the Technology and Society program, 70 in Civic Engagement and Government. C3 removes organizations for which technology is not constitutive. Both counts reported as a bound. See frames.FORD.boundary and notes.txt \u00a76."
+    },
+    "pitun_uva_conflict": {
+      "decided_on": null,
+      "summary": "OPEN. Everyone on the project is affiliated with UVA's PIT-UN, so the registered conflict procedure \u2014 both RAs code independently, disagreement reported unadjudicated \u2014 has no independent coder for that record. The record is NOT deleted: the registration states a conflicted organization is not removed from the pool. Provisional handling is to flag it as one where no team member is independent and keep it out of anything its coding could drive. Settle and record before coding; see snapshots/PITUN/notes.txt \u00a78."
     }
   },
-  "as_of": "2026-09-23",
+  "as_of": null,
   "_as_of_note": "The single register freeze date, ISO. Set once, before enumeration, chosen without reference to any frame's contents. Written to date_identified on every record.",
   "frames": {
     "PITUN": {
@@ -30,27 +49,56 @@
       "lists_institutions": true,
       "_institutions_note": "PIT-UN lists universities. Rule 1 applies to every record: it resolves to the unit the frame itself names, and the parent institution does not enter the sample. Every record is emitted with unit_resolution_flag = PENDING for human resolution.",
       "columns": {
-        "name": "CONFIRM",
-        "website_url": "CONFIRM",
-        "location": "CONFIRM",
-        "listing_text": "CONFIRM"
-      }
+        "name": "name",
+        "website_url": "website_url",
+        "location": null,
+        "listing_text": "listing_text",
+        "_location_note": "LEFT UNMAPPED DELIBERATELY. The frame carries a regional accreditation hub (HLC, West, MSCHE, International), not a location. C2 is determined at O4 from each organization's own materials, as the criterion requires where frame location metadata is absent. The CSV carries international_flag as a signal only; it is not C2.",
+        "_website_note": "website_url is BLANK where the frame offers nothing usable \u2014 a pit-un.org internal link or an unsaved WordPress placeholder. Those values are preserved in pitun_internal_links and broken_links. Blank is deliberate: at O5 the lexicon proxy fetches website_url, and a pit-un.org page would be scored against PIT-UN's vocabulary rather than the member's.",
+        "_from": "pitun_members.csv, produced by pitun_fetch.py parse"
+      },
+      "_captured": "Captured 2026-09-24 with pitun_fetch.py v2.0.0 (kept in snapshots/PITUN/). 72 members across 3 directory pages, plus the 58 entity pages that exist. The directory names no unit, so the entity pages are part of the capture, not an extra: Designee, Positions, Co-Designee, Co-Positions and Website are what Rule 1 resolves against. 14 members have NO entity page \u2014 the server answers with the directory \u2014 and are flagged entity_page_missing in the CSV. See snapshots/PITUN/notes.txt \u00a73.",
+      "_author_conflicted": "The team is employed at the University of Virginia and active in PIT-UN there, so this frame surfaces an organization in which the authors hold a staff role, and PIT-UN itself enters by construction as a Rule 2 operator. NOT COVERED by the registered Conflicts of Interest statement, which names Code for Charlottesville and ACT only; to be added in the next preregistration update. See snapshots/PITUN/notes.txt \u00a78."
     },
     "FORD": {
-      "name": "Ford Foundation Technology and Society grantees",
+      "name": "Ford Foundation grants database (Technology and Society)",
       "block": "A",
       "admission_mechanism": "selection",
       "frame_type": "funder_portfolio",
       "reader": "grants",
       "lists_institutions": true,
-      "_two_source": "Live topic-filtered database (active grants) plus 990-PF filings from 2011. Record which source each grantee came from in source_route; the reader requires that column and refuses a file without it.",
+      "_two_source": "SINGLE SOURCE as of 2026-09-23. The register defined this as a two-source frame \u2014 the live database plus the 990-PF filings from 2011 \u2014 because the live database was thought to show only active grants. The capture disproved that: the database reports min_year 2011 and returned 4,319 grants spanning 2011-2026, including long-closed ones. The 990-PF tail is dropped, as a correction to a source justified by a property the frame does not have. NOT claimed: that the filings would have added nothing; that was not measured. Known limitation: the filings may reach back to ~2006 where the database begins at 2011, so roughly five years of depth may be traded; recorded in notes.txt \u00a75 rather than resolved. The source_route column is RETAINED though it now takes one value (live_database_<date>), so the filings can be added later without a schema change.",
       "columns": {
-        "grantee_name": "CONFIRM",
-        "website_url": "CONFIRM",
-        "location": "CONFIRM",
-        "source_route": "CONFIRM",
+        "grantee_name": "grantee_name",
+        "website_url": "grantee_website_url",
+        "location": "locations",
+        "source_route": "source_route",
         "fiscal_sponsor": null,
-        "listing_text": "CONFIRM"
+        "listing_text": "description",
+        "_from": "ford_grants_live_database.csv, produced by ford_fetch.py flatten",
+        "program_slugs": "program_slugs",
+        "subject_slugs": "subject_slugs"
+      },
+      "_route": "DEVIATION from the registered route, 2026-09-23. The register says 'manual export of the topic-filtered view'. No topic filter exists: the UI exposes only Approval date and Amount facets, search matches grantee names only, and the program appears solely as a field on each grant. The REST route accepts no program, subject or location parameter either, so filtering at capture was never possible. Captured instead from the rendered HTML documents (payload embedded in div.grants-db), unfiltered, via ford_fetch.py fetch-html with a Turnstile clearance obtained manually in a browser. The narrowing moved from capture time to the boundary below. See notes.txt \u00a71-2.",
+      "boundary": {
+        "_decided": "DECISION by the lead reviewer, 2026-09-23, before any record was screened or coded. A grant is inside the FORD frame if its program is Technology and Society OR it carries a Technology subject. Approximately 618 grants, collapsing to fewer organizations once grants are deduplicated at O3.",
+        "program_slug": "technology-and-society",
+        "include_technology_subject": true,
+        "subject_slug": "technology",
+        "rule": "program_slug == 'technology-and-society' OR 'technology' in subject_slugs",
+        "_why": "The registered purpose is Ford's technology-and-society grantmaking, not its Technology and Society budget line. Of 400 grants Ford itself tags with a Technology subject, 80 sit in other current programs \u2014 70 of them in Civic Engagement and Government, which is squarely the tradition Block A exists to cover. Those are not a labelling artifact; they are grants Ford tags as technology while funding them from a different program. A program-only boundary would discard them on an internal accounting distinction. A further 42 sit under 'Other Grantmaking', the residual label applied to pre-2018 grants that did not map onto the current structure, and carry the frame's historical depth.",
+        "_what_it_admits": "Grants whose technology tag is incidental to the organization's work. That is what C3 (constitutive technology) exists to remove \u2014 remove the technology and ask whether the core activity survives. The wider boundary hands that judgment to the registered criterion rather than pre-empting it with a program label, which is the same reasoning used for the CTFG country-missing records and the CFA location_rule. Expect heavier C3 attrition in this frame than in an identity frame.",
+        "_what_it_costs": "A larger screening load, and a frame whose composition depends on Ford's own subject tagging, which the study does not control and cannot audit. Reported as a limitation, not resolved.",
+        "_measured": {
+          "technology_and_society_program_grants": 338,
+          "technology_subject_grants_total": 400,
+          "technology_subject_in_program": 320,
+          "technology_subject_outside_program": 80,
+          "technology_subject_under_other_grantmaking": 42,
+          "grants_inside_chosen_boundary": "~618",
+          "grants_inside_program_only_boundary": 338,
+          "_report": "Both boundary counts are reported in the write-up as a measured bound on frame completeness \u2014 what this frame would have contained under the narrower rule \u2014 in the same manner as the CTFG boundary audits. The difference, 280 grants, is the quantity at stake in the choice."
+        }
       }
     },
     "CTFG": {
@@ -87,11 +135,18 @@
       "reader": "generic",
       "lists_institutions": false,
       "columns": {
-        "name": "CONFIRM",
-        "website_url": "CONFIRM",
-        "location": "CONFIRM",
-        "listing_text": null
-      }
+        "name": "name",
+        "website_url": "url",
+        "location": null,
+        "listing_text": null,
+        "_location_note": "The frame carries no location data of any kind. Every C2 determination for these 18 records is made at O4 from the organization's own materials. Member names often carry a US city, but a name is not an address and no location is inferred at capture.",
+        "_listing_text_note": "No description, delegate or join date is published. Nothing for listing_text to carry.",
+        "_from": "act_members.yml, a YAML list of {name, url} copied verbatim from _data/members.yml. The reader handles .yml via PyYAML; do NOT rename it to .csv, because the reader chooses by suffix and a YAML file read as CSV parses as one long broken row rather than failing."
+      },
+      "_captured": "Captured 2026-09-24. Pinned to a COMMIT rather than a date: github.com/civictechnologists/website at c18a8b03a798c54e0cb3ac7465b945915480a42e, file _data/members.yml -> act_members.yml. 18 members, name and URL only. The raw file was archived at its commit URL, so the roster survives the repository. See snapshots/ACT/notes.txt.",
+      "_pinned_commit": "c18a8b03a798c54e0cb3ac7465b945915480a42e",
+      "_trap": "The repository's _data/ directory also holds organizations.yml and leaders.yml. BOTH ARE UNUSED JEKYLL SCAFFOLDING \u2014 leaders.yml contains Mario Brothers placeholder entries, and about.markdown references organizations.yml only from a commented-out TODO. Only members.yml is the member list. The wrong file parses cleanly, so the failure would be silent.",
+      "_author_conflicted": "Two conflicted records from this frame: Code for Charlottesville, which an author leads and co-founded, enters as a member; ACT itself enters by construction as a Rule 2 operator and an author participates in it. Both are disclosed in the registered Conflicts of Interest statement. See snapshots/ACT/notes.txt \u00a73."
     },
     "CFA": {
       "name": "Code for America brigades (archived)",
@@ -100,7 +155,7 @@
       "frame_type": "identity",
       "reader": "cfa",
       "lists_institutions": false,
-      "_pin": "organizations.json pinned to a commit SHA, not a date. Record the SHA in the manifest.",
+      "_pin": "Pinned to commit 6c5654c7fd9b9f9f236fcf6687d91f422efec050 of github.com/codeforamerica/brigade-information, file organizations.json. Captured 2026-09-23/24; the raw file was archived at its commit URL on 2026-09-24, which matters more here than for ACT because this repository records a program Code for America wound down in June 2023. See snapshots/CFA/notes.txt.",
       "tags": {
         "include_any": [
           "Brigade"
@@ -114,7 +169,7 @@
           "Partner",
           "Fiscally Sponsored"
         ],
-        "_confirm": "Tag vocabulary is NOT confirmed. Run `inspect --frame CFA` against the pinned file to print the full tag inventory with counts, then set these lists. The register notes 221 records of which 181 carry a Brigade tag, and that the file also holds 18F, Code for All members, German OK Labs, Code for Poland and government entities."
+        "_confirm": "STILL UNCONFIRMED as of 2026-09-24 \u2014 THIS BLOCKS ENUMERATION OF THIS FRAME. The lists above are guesses taken from the register's prose description, not observations of the file. The reader refuses on an empty include_any but CANNOT tell a wrong tag from a right one, so a mistyped tag yields a silently empty or wrong frame. Run `enumerate_o3.py inspect --frame CFA --file snapshots/CFA/organizations.json`, which prints the full tag inventory with counts, then set include_any, exclude_any and independence_tags from what is actually there and record the inventory in snapshots/CFA/notes.txt \u00a74. The register notes 221 records of which roughly 181 carry a Brigade tag, and that the file also holds 18F, Code for All members, German OK Labs, Code for Poland and government entities."
       },
       "boundary": {
         "location_rule": "drop_clearly_non_us",
@@ -131,7 +186,8 @@
         "tags": "tags",
         "previous_names": "previous_names",
         "listing_text": null
-      }
+      },
+      "_pinned_commit": "6c5654c7fd9b9f9f236fcf6687d91f422efec050"
     },
     "FF": {
       "name": "Fast Forward portfolio",
@@ -141,11 +197,15 @@
       "reader": "generic",
       "lists_institutions": false,
       "columns": {
-        "name": "CONFIRM",
-        "website_url": "CONFIRM",
-        "location": "CONFIRM",
-        "listing_text": null
-      }
+        "name": "name",
+        "website_url": "website_url",
+        "location": null,
+        "listing_text": "listing_text",
+        "_location_note": "LEFT UNMAPPED DELIBERATELY. The frame's 'Regions' field is the geography the organization's WORK SERVES, not its headquarters: Black Sisters in STEM is US-based and lists Africa, Belgium, Canada, Germany and U.S.; Adalat AI lists Ghana and India. Filtering on it would drop US organizations working abroad and admit foreign organizations working in the US. C2 is determined at O4 from the organization's own materials. 55 of 102 list U.S. as their only region; that is a property of the frame, not a C2 estimate.",
+        "_from": "ffwd_portfolio.csv, produced by ffwd_fetch.py parse. listing_text carries the description, issue areas, regions (labelled BENEFICIARY, not HQ) and technologies."
+      },
+      "_captured": "Captured 2026-09-24 with ffwd_fetch.py v1.0.0 (kept in snapshots/FF/). 102 organizations, matching Fast Forward's own reported total, from 11 pages of https://www.ffwd.org/directory?portfolio=true. See snapshots/FF/notes.txt.",
+      "_boundary_is_in_the_url": "THE ONLY FRAME WHOSE BOUNDARY IS APPLIED AT CAPTURE. Fast Forward publishes two listings from one directory: /directory holds 1,759 organizations that enter by submitting a form, and /directory?portfolio=true holds the 102 accelerator alumni. The register's frame is the portfolio. The difference is not only size: form submission is self-declaration, where this frame's registered admission_mechanism is selection, so capturing the open directory would corrupt a recorded confound rather than merely inflate a count. The fetch script refuses to run if the reported total exceeds 500."
     },
     "MCGV": {
       "name": "Patrick J. McGovern Foundation grantees",
@@ -156,13 +216,21 @@
       "lists_institutions": false,
       "_unit": "The unit in this source is GRANTS, not organizations (register: 795 grants, relationships averaging 3-7 each). The reader deduplicates to organizations within the frame and records grant_count. Some grants route via fiscal sponsors, so the named grantee may be the sponsor.",
       "columns": {
-        "grantee_name": "CONFIRM",
-        "website_url": "CONFIRM",
-        "location": "CONFIRM",
+        "grantee_name": "Grantee",
+        "website_url": "website_url",
+        "location": "Location",
         "source_route": null,
-        "fiscal_sponsor": "CONFIRM",
-        "listing_text": "CONFIRM"
-      }
+        "fiscal_sponsor": "Fiscal Sponsor",
+        "listing_text": "Grant",
+        "_website_note": "RECOVERED SEPARATELY, not in the downloaded CSV. mcgv_urls.py paged the 89 listing pages and joined each grantee's link on by name \u2014 all 450 names matched exactly. 334 of 450 grantees have a website in the frame (267 absolute URLs, 67 written as a BARE DOMAIN with no scheme, which a browser resolves relative to the page into a dead mcgovern.org/grants/... link; the domain itself is correct and is read from the source and given a scheme). 116 carry a grantee-website anchor with no href at all and are left BLANK rather than guessed. url_source records which of the three cases each record is, because they are not equally strong evidence. A mcgovern.org URL is never recorded as a grantee's website: at O5 the lexicon proxy would score the funder's vocabulary instead of the grantee's.",
+        "_location_note": "Location is the GRANTEE's own location as the funder records it (Boulder, CO, USA; Nairobi, 110, KEN), not beneficiary geography \u2014 closer to C2 than FF's regions field and worth mapping. Still not C2 itself: C2 is determined at O4 from the organization's own materials. No location filter applied at capture.",
+        "_source_route_note": "Single source, so no source_route column. Unlike FORD, which the register defined as two-source.",
+        "_join": "The reader needs website_url on the same rows as the grants. Join mcgv_grantee_urls.csv onto the grants CSV on Grantee before enumerating, or point the reader at a merged file. 450 distinct grantee names across 890 grant rows."
+      },
+      "_captured": "CSV downloaded from https://www.mcgovern.org/grants/ on 2026-09-24: 890 grant rows, matching the site's 89 pages at 10 per page. Headers: Grantee, Fiscal Sponsor, Grant, Amount, Focus Area, Location, Date. The register's figure of 795 came from the 990-PF grantee database; the live database covers July 2017 to now and is updated WEEKLY, so it runs ahead of the tax filings. The live database is what the register names.",
+      "_no_filter_applied": "Captured unfiltered. The register names no focus-area filter for this frame, unlike FORD. Focus areas include McGovern's legacy brain-research giving \u2014 Neuroscience, Legacy, DAF, Matching Gift, N/A \u2014 which C3 removes by asking whether the core activity survives without the technology. That judgment belongs to the criterion, not to a capture-time filter.",
+      "_expect": "Heavy repetition: MIT, Trek Medics, CarbonPlan, Blue Star Families, Materiom, Upsolve, Jhpiego and Poynter each appear several times in the first two years alone, so 890 grants collapse to far fewer organizations. Heavy fiscal sponsorship: Convergent Research, FFWD, GDI Solutions, Social Good Fund, New Venture Fund, Allied Media Projects, Community Initiatives all appear as sponsors, each firing the Rule 1 clause. Heavy C2 attrition: the most international frame in the register \u2014 GBR, KEN, IND, BRA, CHE, ARG, COL, DEU, FRA, ZAF, NGA, ETH, PAK, AUT, CHL, NCL. Some grantees are institutions (MIT, Northeastern, Brown, George Washington, UCSF Foundation), so Rule 1 applies case by case at O3 even though lists_institutions is false for this frame.",
+      "_block_c_overlap": "FFWD (Fast Forward) appears here BOTH as a grantee (2024 and 2025, $500,000 each) and as a fiscal sponsor for Materiom and Climate Cabinet Education. The Block C overlap anticipated in snapshots/FF/notes.txt \u00a76 is therefore observed, not predicted. Within block, so it does not enter the multi-frame subset of sensitivity check (f); provenance retained."
     },
     "GORG": {
       "name": "Google.org, four named cohorts",

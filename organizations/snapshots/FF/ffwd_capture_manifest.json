@@ -1,0 +1,12 @@
+{
+  "script": "ffwd_fetch.py",
+  "script_version": "1.0.0",
+  "captured_utc": "2026-09-24T07:30:24+00:00",
+  "url": "https://www.ffwd.org/directory?portfolio=true",
+  "_boundary": "portfolio=true applied AT CAPTURE and is the frame definition, not a convenience: the unfiltered directory holds 1,759 organizations that enter by submitting a form (self-declaration), where this frame's registered admission mechanism is selection.",
+  "_no_location_filter": "The directory's Geographies control is beneficiary geography, not headquarters. No location filter was applied; C2 is determined at O4 from each organization's own materials.",
+  "pages": 11,
+  "per_page": 10,
+  "reported_total": 102,
+  "organizations_captured": 101
+}

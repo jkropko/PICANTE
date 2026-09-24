@@ -1,0 +1,59 @@
+# MCGV — archived captures
+# One URL per line. Lines beginning with # are notes and are ignored by
+# capture_log.py, which reads the first non-comment line as the frame's
+# archive reference.
+
+# --- Grants database, sampled: 4 of 89 pages -----------------------------
+# Saved 2026-09-24 07:57-08:05 UTC = 03:57-04:05 EDT.
+
+# page 1 of 89 — most recent grants. Its pagination control showing 89 pages is
+# third-party evidence of the frame's SIZE on the capture date.
+https://web.archive.org/web/20260924075717/https://www.mcgovern.org/grants/
+
+# page 2 of 89 — recency
+https://web.archive.org/web/20260924080410/https://www.mcgovern.org/grants/page/2/
+
+# page 49 of 89 — midpoint
+https://web.archive.org/web/20260924080440/https://www.mcgovern.org/grants/page/49/
+
+# page 89 of 89 — the OLDEST grants, and the most valuable of the four. It
+# corroborates that the database reaches back to July 2017 as the site claims,
+# which is a coverage claim these notes rely on.
+https://web.archive.org/web/20260924080458/https://www.mcgovern.org/grants/page/89/
+
+# --- The CSV endpoint was tried first, and failed ------------------------
+#
+# The stronger route would have been to archive the export itself — one save
+# covering all 890 grants, as ACT's raw members.yml was archived at its pinned
+# commit instead of the rendered page. A Wayback save of the CSV endpoint was
+# attempted on the capture date and FAILED.
+#
+# The reason is structural rather than transient: the "Download as CSV file"
+# control carries an empty href and a csv title attribute, so the file is
+# assembled client-side or served as an attachment. Either way there is no
+# stable URL for the archive to fetch. Re-attempting will not help.
+#
+# Recorded because the failure explains why a weaker route was used. The
+# attempt is part of the method, not an omission from it.
+
+# --- What these four snapshots do and do not cover -----------------------
+#
+# COVER: the frame's size (89 pages), its recency, its midpoint, and its depth
+# back to the oldest grants. Each of the four supports a specific claim made in
+# notes.txt rather than sampling at random.
+#
+# DO NOT COVER: the membership. 40 of 890 grants are archived. Nobody was ever
+# going to reconstruct this frame from archived HTML — the downloaded CSV,
+# hashed in capture_log.json and deposited on OSF, is the record.
+#
+# THE LIMITATION, STATED PLAINLY. This is the fastest-moving frame in the
+# register: McGovern updates the grants database WEEKLY. A re-fetch a month
+# from now returns a materially different set — more so than Fast Forward,
+# which grows once per cohort. So the archive is doing more work here than
+# anywhere else in the register, and four pages of it is thin. A reader who
+# doubts the captured membership can verify the frame's shape and span from a
+# third party, but not its contents.
+#
+# Archiving all 89 would close that gap at the cost of 89 manual saves against
+# a rate limit. It was judged disproportionate. Every tenth page (ten saves)
+# would be the obvious middle course if this later matters.

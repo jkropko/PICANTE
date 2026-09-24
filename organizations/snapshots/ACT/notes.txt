@@ -1,0 +1,140 @@
+# ACT — capture notes
+
+Frame: Alliance of Civic Technologists member list (Block B).
+Captured: 2026-09-24. Register freeze date: [RECORD HERE].
+Captured by: J. Kropko.
+
+---
+
+## 1. Route
+
+Registered route followed without deviation, and in the strongest available
+form. ACT's site is a Jekyll build whose member list is version-controlled, so
+the frame is pinned to a **commit SHA rather than a date**:
+
+    repository  https://github.com/civictechnologists/website
+    commit      c18a8b03a798c54e0cb3ac7465b945915480a42e
+    file        _data/members.yml  ->  act_members.yml
+
+This is the same treatment as CFA and, with it, the second of only two frames
+in the register that can be reproduced exactly rather than approximately. The
+rendered page at https://www.civictechnologists.org/about#organizations is the
+public presentation of this file; the file is the capture.
+
+**Archived at the pinned commit.** The raw file was saved to the Wayback
+Machine *at its commit URL* rather than the rendered page being saved, so the
+archive holds the exact bytes of the frame of record:
+`.../web/20260924070442/https://raw.githubusercontent.com/.../c18a8b0.../_data/members.yml`
+(see `wayback.txt`). This closes the one weakness of a SHA pin — it resolves
+only while GitHub hosts the repository — without giving up the exactness a
+page snapshot cannot provide. Worth repeating for CFA, the register's only
+other SHA-pinned frame.
+
+**18 member organizations.** Each record carries a name and a URL. Nothing
+else — no location, no description, no delegate, no join date.
+
+The roster itself is not reproduced in this file: it is frame contents, and
+frame contents stay out of git and go to OSF. Two members are named below
+because specific flags attach to them.
+
+## 2. TRAP: three data files, only one is live
+
+The repository's `_data/` directory holds `members.yml`, `organizations.yml`
+and `leaders.yml`. **Only `members.yml` is the member list.**
+
+`leaders.yml` contains unused Jekyll scaffolding — its entries are
+"Mario Mario – Chief Executive Officer, Top plumber in the Mushroom Kingdom"
+and similar. `organizations.yml` is likewise unused: `about.markdown` carries a
+commented-out `TODO` block referencing it, which is why it survives in the
+repository.
+
+Anyone re-running this capture who reaches for the file whose name most
+resembles "organizations" will enumerate placeholder content. The trap is
+recorded because the correct choice is not obvious from the filenames, and
+because the failure would be silent — `organizations.yml` parses cleanly.
+
+## 3. AUTHOR-CONFLICTED FRAME — two records
+
+**Code for Charlottesville is a member of ACT.** The registered Conflicts of
+Interest statement discloses that an author leads and co-founded it. The record
+enters the pool through this frame.
+
+**ACT itself enters by construction** as a Rule 2 frame operator, and the
+registration discloses that the same author participates in it. The
+registration already flags ACT as author-conflicted for this reason.
+
+Both records take the registered procedure: flagged `author_conflicted` in the
+shared dataset; the conflicted author does not screen, code, adjudicate or
+review them at any stage; both research assistants code them independently; and
+where their codings differ **the disagreement is reported rather than
+adjudicated**, because the person who would ordinarily adjudicate is the
+conflicted party. Every recusal is logged and reported.
+
+**To check before coding**, in light of what emerged for PIT-UN: whether either
+research assistant has an affiliation with ACT or with Code for Charlottesville.
+The registered procedure assumes the assistants are unconflicted coders. Where
+that does not hold — as it may not for the UVA record under PIT-UN (see
+`../PITUN/notes.txt` §8) — the record must additionally be flagged as one where
+no team member is independent, and excluded from anything its coding could
+drive: it should not anchor an emergent category in the inductive coding, and
+should not serve as an exemplar in the meta-narrative synthesis. Retained,
+counted and reported, but not load-bearing.
+
+## 4. A live C1 question, flagged not pre-judged
+
+**Code with the Carolinas** is listed with a Meetup group URL rather than a
+domain of its own. C1 asks whether the candidate has its own name, its own web
+presence, and evidence of staffing or governance. A Meetup page is a genuine
+question under that criterion and not an obvious fail — it is a web presence,
+of a kind, and many volunteer civic tech groups organise entirely through
+Meetup.
+
+Left for the O4 coder. Recorded here so the question is noticed rather than
+resolved by whoever happens to open the record.
+
+## 5. No location field: C2 falls entirely to O4
+
+The frame carries no location data of any kind. Every C2 determination for
+these 18 records is made at O4 from the organization's own materials, as the
+criterion requires where a frame's location metadata is absent.
+
+Same position as PIT-UN, and consistent with the CTFG country-missing treatment
+and the CFA `location_rule` decision: the frame boundary does not pre-empt a
+criterion the registration assigns to a human.
+
+Most member names carry a US city or state, but a name is not an address and
+the field does not exist. No location is inferred at capture.
+
+## 6. Expected overlap with CFA, and why it is not compared
+
+ACT is the successor network to Code for America's Brigade program, which was
+sunset in June 2023 — the register's own description, and ACT describes itself
+the same way. Several members are plausibly also on the archived brigade
+roster.
+
+Two consequences, both already registered:
+
+- The overlap is **within Block B**, so these records do not enter the
+  multi-frame subset used in sensitivity check (f), which requires frames from
+  two or more blocks. Their multi-frame provenance is still retained in the
+  data.
+- Frame redundancy is reported per block as description and **is not compared
+  across blocks** as evidence of relative population size. The register names
+  this case explicitly: a successor network to a sunset one manufactures
+  overlap independently of field size. Nothing here should be read as evidence
+  that civic technology has more or fewer organizations than another block.
+
+## 7. Still to do for this frame
+
+- [x] Capture `_data/members.yml`, pinned to commit
+      c18a8b03a798c54e0cb3ac7465b945915480a42e (18 members)
+- [x] `primary.txt` naming `act_members.yml`
+- [x] Wayback the raw `members.yml` at its pinned commit → `wayback.txt`
+      (2026-09-24; durable *and* exact, unlike either the SHA or a page
+      snapshot alone)
+- [ ] Do the same for CFA: archive `organizations.json` at its pinned commit
+- [ ] Map columns in `frames.json`: `name`, `website_url`. Leave `location`
+      unmapped — the frame has no location field (§5).
+- [ ] Check whether either research assistant is affiliated with ACT or Code
+      for Charlottesville (§3)
+- [ ] Run `capture_log.py log` once all frames are captured

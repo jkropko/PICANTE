@@ -1,0 +1,33 @@
+# CFA — archived captures
+# One URL per line. Lines beginning with # are notes and are ignored by
+# capture_log.py, which reads the first non-comment line as the frame's
+# archive reference.
+
+# --- The pinned brigade roster, archived at its pinned commit ------------
+# Saved 2026-09-24 07:11 UTC = 03:11 EDT.
+https://web.archive.org/web/20260924071145/https://raw.githubusercontent.com/codeforamerica/brigade-information/6c5654c7fd9b9f9f236fcf6687d91f422efec050/organizations.json
+
+#     repository  https://github.com/codeforamerica/brigade-information
+#     commit      6c5654c7fd9b9f9f236fcf6687d91f422efec050
+#     file        organizations.json
+#
+# Archived at the commit URL rather than as a rendered page, for the reason
+# given at length in ../ACT/wayback.txt: a SHA pins exact CONTENT but resolves
+# only while GitHub hosts the repository, while a page snapshot is durable but
+# fixes a presentation. The raw file at its pinned commit is both.
+#
+# That exposure is sharper here than for ACT. This frame is HISTORICAL — Code
+# for America sunset the Brigade Network in June 2023 — so the repository
+# records a program its owner has already wound down. A repository for a
+# discontinued program is a more plausible candidate for archiving, deletion or
+# transfer than one for a live one, and this frame carries the closure and
+# field-dynamics analysis that nothing else in the register can supply.
+#
+# With this snapshot, the roster survives the repository.
+
+# --- Not archived, and why -----------------------------------------------
+#
+# There is no rendered Code for America page corresponding to this file: the
+# Brigade Network directory it once fed is gone, which is the point of using a
+# version-controlled historical frame rather than a live listing. The file is
+# the frame, and it is now archived.

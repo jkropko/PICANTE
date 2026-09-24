@@ -1,0 +1,51 @@
+# FORD — archived captures
+# One URL per line. Lines beginning with # are notes and are ignored by
+# capture_log.py, which reads the first non-comment line as the frame's
+# archive reference.
+
+# --- Grants database -----------------------------------------------------
+https://web.archive.org/web/20260924002149/https://www.fordfoundation.org/work/our-grants/awarded-grants/grants-database/
+
+# Snapshot timestamp 20260924002149 = 2026-09-24 00:21:49 UTC, which is
+# 2026-09-23 20:21 EDT. Wayback timestamps are UTC, so this snapshot carries
+# the following day's date while belonging to the 2026-09-23 capture session
+# recorded in notes.txt. Noted so the one-day discrepancy reads as a timezone
+# convention rather than as two separate captures.
+
+# WHAT THIS SNAPSHOT ACTUALLY CONTAINS — READ BEFORE RELYING ON IT
+#
+# The Wayback crawler did not reach the grants database. It was served the
+# Cloudflare Turnstile gate and archived that instead. The evidence is in the
+# resources the save pulled in:
+#
+#   https://challenges.cloudflare.com/turnstile/v0/b/d76008a69eab/api.js
+#   https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/b/turnstile/
+#       f/av0/rch/g5094/0x4AAAAAAD17y8gUlgDNpJRz/auto/fbE/new/normal?lang=auto
+#   https://www.fordfoundation.org/favicon.ico
+#
+# Those are the challenge widget's own scripts. A snapshot of the database
+# would have pulled the theme CSS, the fonts, and the embedded grants payload.
+# The site key 0x4AAAAAAD17y8gUlgDNpJRz matches the one in the gate markup.
+#
+# So this snapshot is dated third-party evidence that the grants database was
+# behind a human-verification gate on 2026-09-23. It is NOT an archived copy
+# of the frame's contents, and must not be cited as one.
+
+# --- What stands as the record of this frame's contents ------------------
+#
+# The captured payload itself: snapshots/FORD/raw/page_0001.json through
+# page_0044.json, 4,319 unique grants, hashed in capture_log.json. Because the
+# archive route failed, that capture is the ONLY record of what this frame held
+# on the freeze date. It cannot be reconstructed later: the database is live,
+# and the gate blocks third-party archiving.
+#
+# Consequence: back this directory up somewhere beyond the working machine
+# before enumerating, and deposit it on OSF with the other snapshots. For every
+# other frame the Wayback snapshot is a second copy; here it is not.
+
+# --- Still to archive for this frame -------------------------------------
+# Governance and Financial Statements (the 990-PF source), if the 990-PF tail
+# is retained — see notes.txt section 5, where its necessity is in question
+# because the live database already reaches back to 2011:
+# https://www.fordfoundation.org/about/about-ford/governance-and-financial-statements/
+# That page is unlikely to be gated, so expect a real snapshot there.

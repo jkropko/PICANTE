@@ -206,11 +206,66 @@ announcement naming institutions and checking them against
 `pitun_members.csv`, or a comparison against the three archived directory pages
 at a later date to see whether the roster moves at all.
 
-## 8. Still to do for this frame
+## 8. AUTHOR-CONFLICTED FRAME — a disclosure not in the registered statement
+
+**The research team is employed at the University of Virginia and is active in
+PIT-UN there.** UVA is a PIT-UN member, so this frame surfaces an organization
+in which the authors hold a staff role, and it does so through the frame in
+which they participate.
+
+**This is not covered by the registered Conflicts of Interest statement.** That
+statement discloses one author's role at Code for Charlottesville and his
+participation in the Alliance of Civic Technologists. It does not mention UVA,
+PIT-UN, or the team's participation in it. The omission is recorded here on the
+date it was identified — at capture, before any record was screened or coded —
+and must be added to the Conflicts of Interest field in the next
+preregistration update.
+
+**What the registered procedure requires**, applied here:
+
+- The UVA record — whichever unit Rule 1 resolves it to — is flagged
+  `author_conflicted` in the shared dataset.
+- No conflicted author screens, codes, adjudicates or reviews the coding of
+  that record at any stage.
+- Both research assistants code it independently, and where their codings
+  differ **the disagreement is reported rather than adjudicated**, because the
+  person who would ordinarily adjudicate is the conflicted party.
+- The recusal is logged and reported with the review.
+
+**PIT-UN itself is also implicated.** As a frame operator it enters the
+candidate pool by construction under Rule 2, and the team participates in it.
+This parallels the Alliance of Civic Technologists, which the registration
+already flags as author-conflicted for the same reason — participation in a
+network that is both a frame and a record. Treat the PIT-UN operator record as
+author-conflicted on the same terms, and record that reading in the update
+rather than leaving it to inference.
+
+**So this frame yields at least two conflicted records**: the UVA member record
+and the PIT-UN operator record. Block B yields two more by the same logic —
+Code for Charlottesville and ACT.
+
+**The residual limitation the registration already acknowledges applies with
+particular force here.** The research assistants are supervised by the
+conflicted authors, so their independence is structural rather than complete.
+Independent double coding and the reporting of unadjudicated disagreement make
+any resulting bias visible in the shared data; they do not eliminate it.
+Readers should weigh the coding of these records accordingly.
+
+**Action required before coding begins:** confirm which unit the frame names
+for UVA (check `pitun_members.csv` — Positions, Co-Positions and Website), so
+the conflicted record is identified in advance rather than recognised
+mid-coding.
+
+## 9. Still to do for this frame
 
 - [x] Capture directory and entity pages (72 members, 2026-09-23)
 - [x] Confirm the 14 missing entity pages in a browser (§3)
 - [x] 2026–27 cohort — assessed, not confirmable from the source (§7)
+- [ ] **Confirm which unit the frame names for UVA**, and flag that record
+      author-conflicted in advance (§8)
+- [ ] **Add the UVA / PIT-UN conflict to the Conflicts of Interest field in
+      the next preregistration update** (§8). The registered statement covers
+      Code for Charlottesville and ACT only.
 - [x] Wayback all three directory pages → `wayback.txt` (2026-09-23; ungated,
       succeeded)
 - [x] Archive one of the 14 that redirect — Columbia, 2026-09-24; the save

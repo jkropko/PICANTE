@@ -1,0 +1,72 @@
+# FF — archived captures
+# One URL per line. Lines beginning with # are notes and are ignored by
+# capture_log.py, which reads the first non-comment line as the frame's
+# archive reference.
+
+# --- Portfolio listing, COMPLETE: all 11 pages, all 102 organizations ----
+# Saved 2026-09-24 07:38-07:47 UTC = 03:38-03:47 EDT.
+#
+# THE FILTER IS IN THE URL, AND THAT IS WHAT WAS ARCHIVED. Every snapshot is
+# of ?portfolio=true. Archiving /directory would have documented the wrong
+# listing entirely: 1,759 organizations that enter by submitting a form, where
+# this frame is the 102 accelerator alumni admitted by selection. See
+# notes.txt §1.
+
+# page 1 of 11 (records 1-10)
+https://web.archive.org/web/20260924073837/https://www.ffwd.org/directory?portfolio=true
+
+# page 2 of 11 (records 11-20)
+https://web.archive.org/web/20260924074305/https://www.ffwd.org/directory?portfolio=true&page=2
+
+# page 3 of 11 (records 21-30)
+https://web.archive.org/web/20260924074307/https://www.ffwd.org/directory?portfolio=true&page=3
+
+# page 4 of 11 (records 31-40)
+https://web.archive.org/web/20260924074314/https://www.ffwd.org/directory?portfolio=true&page=4
+
+# page 5 of 11 (records 41-50)
+https://web.archive.org/web/20260924074505/https://www.ffwd.org/directory?portfolio=true&page=5
+
+# page 6 of 11 (records 51-60)
+https://web.archive.org/web/20260924074514/https://www.ffwd.org/directory?portfolio=true&page=6
+
+# page 7 of 11 (records 61-70)
+https://web.archive.org/web/20260924074519/https://www.ffwd.org/directory?portfolio=true&page=7
+
+# page 8 of 11 (records 71-80)
+https://web.archive.org/web/20260924074702/https://www.ffwd.org/directory?portfolio=true&page=8
+
+# page 9 of 11 (records 81-90)
+https://web.archive.org/web/20260924074645/https://www.ffwd.org/directory?portfolio=true&page=9
+
+# page 10 of 11 (records 91-100)
+https://web.archive.org/web/20260924074746/https://www.ffwd.org/directory?portfolio=true&page=10
+
+# page 11 of 11 (records 101-102)
+https://web.archive.org/web/20260924074752/https://www.ffwd.org/directory?portfolio=true&page=11
+
+# --- Why all eleven, rather than the first ------------------------------
+#
+# The listing paginates at 10 per page, so one snapshot documents 10 records.
+# Page 1's header showing '102 results' is third-party evidence of the frame's
+# SIZE, but only the full set archives the MEMBERSHIP.
+#
+# That matters more for this frame than for most. ffwd.org is ungated, so
+# anyone can re-fetch the listing — but the portfolio GROWS: the 2027
+# Accelerator was taking applications on the capture date, and each cohort adds
+# roughly ten organizations. A re-fetch in six months returns the frame as it
+# stands then, not as it stood at the freeze. These snapshots are the only
+# independent route back to the freeze state.
+#
+# With them, a reader who doubts the captured membership can reconstruct it
+# from a third party rather than taking the project's own files on trust.
+
+# --- Note on the page 8/9 timestamps ------------------------------------
+#
+# Page 9 (074645) carries an earlier timestamp than page 8 (074702). The saves
+# were requested in order; the Internet Archive completed them out of order,
+# which it does when a request queues. Recorded so the 17-second inversion
+# reads as a queueing artifact rather than as evidence the pages were captured
+# from different states of the site. All eleven fall within a ten-minute
+# window and the record counts across them sum to 102, matching the site's own
+# reported total.

@@ -1,0 +1,162 @@
+# FF — capture notes
+
+Frame: Fast Forward accelerator portfolio (Block C).
+Captured: 2026-09-24. Register freeze date: [RECORD HERE].
+Captured by: J. Kropko.
+Tool: `ffwd_fetch.py` v1.0.0 (kept in this directory), `fetch` then `parse`.
+
+---
+
+## 1. Route, and a boundary that lives in the URL
+
+Registered route followed. **102 organizations**, matching Fast Forward's own
+reported total exactly, captured from 11 pages of:
+
+    https://www.ffwd.org/directory?portfolio=true
+
+`https://www.ffwd.org/alumni/` redirects there. Every record carries an "FFWD
+Portfolio" badge, a link to the organization's own site, a description, issue
+areas, regions and technologies.
+
+**The live listing will move.** The 2027 Accelerator was taking applications on
+the capture date, so new cohorts will join the portfolio. ffwd.org is ungated,
+so anyone can re-fetch it — but a later re-fetch will not reproduce the frozen
+frame, only the frame as it stands then. The archived pages are the only route
+back to the freeze state, and at present one of eleven is archived
+(`wayback.txt`).
+
+**`portfolio=true` is the frame definition, not a convenience.** Fast Forward
+publishes two listings from the same directory:
+
+    /directory                    1,759 results
+    /directory?portfolio=true       102 results
+
+The register's frame is the accelerator portfolio. The full directory is "every
+tech nonprofit that we know about", and organizations enter it **by submitting
+a form**. That is a self-declaration admission mechanism, where this frame's
+registered admission mechanism is **selection**. Capturing the directory would
+not merely have inflated the frame seventeenfold; it would have changed what
+Block C is sampling and corrupted `admission_mechanism`, a variable the
+analysis records specifically because it is a confound it must hold rather than
+ignore.
+
+The boundary is therefore applied at capture, by the URL, rather than in
+`frames.json`. This is the only frame in the register where that is true, and
+it is recorded in `ffwd_capture_manifest.json` so the reason travels with the
+data. The fetch script refuses to run if the reported count exceeds 500, which
+is what a failure of the filter would look like.
+
+## 2. The Geographies field is NOT C2, and no location filter was applied
+
+Each record carries "Regions". These are the geographies the organization's
+**work serves**, not where it is based:
+
+    Bayes Impact            France
+    Adalat AI               Ghana, India
+    Black Sisters in STEM   Africa, Belgium, Canada, Germany, U.S.
+    AccesSOS                U.S.
+
+Black Sisters in STEM is US-based with international reach; Adalat AI works in
+Indian courts. Filtering the directory's Geographies control to "U.S." would
+**drop US organizations working abroad and admit foreign organizations working
+in the US** — wrong in both directions.
+
+No location filter was applied at capture. C2 asks about headquarters or
+principal operations and is a human determination at O4 from each
+organization's own materials. Same position as CTFG's missing country field,
+the CFA location rule, and PIT-UN's regional hubs: the frame boundary does not
+pre-empt a criterion the registration assigns to a coder.
+
+**55 of 102 list "U.S." as their only region.** That number is recorded as a
+property of the frame and **is not a C2 estimate or a prediction of one.**
+`listing_text` labels the field "(BENEFICIARY, not HQ)" so a coder reading a
+record at O3 cannot mistake it for C2 evidence.
+
+Expect substantial C2 attrition regardless. The 2026 cohort alone spans the
+United States, India, France and Mexico.
+
+## 3. A silent exclusion, found and fixed
+
+The first parse returned **101 of 102**. Nothing errored: page 6 held nine
+records where every other full page held ten, and the shortfall read like an
+off-by-one in how the site counts. It surfaced only because the script compares
+captured records against the site's own reported total and says so.
+
+Cause: the parser skipped site chrome and social links by testing whether a
+skip string appeared **anywhere in the URL**, and `x.com` was on that list.
+**muevete + x.com + .mx** — the Mexican member Muevetex was removed from the
+frame because its domain ends in "x" before ".com".
+
+Fixed in v1.0.0 by comparing HOSTS, exactly or as a parent domain, so a skip
+entry can never match the middle of an unrelated organization's domain. Ten
+test cases cover it, including `relx.com` as a control.
+
+Recorded because the failure mode matters more than the record. A rule that
+deletes members by accident of domain spelling is invisible: no error, no gap
+in the page, no trace in the output. And it was not deleting at random — it
+removed a Mexican organization from a frame where C2 attrition is the central
+question, so the loss would have been correlated with exactly the variable this
+frame is most sensitive on.
+
+## 4. What the frame gives, and what it does not
+
+**Gives:** organization name, its own website URL, a one- or two-sentence
+description, issue areas, regions, technologies. All 102 records carry a
+description — the richest `listing_text` of any frame captured so far, and
+unlike ACT's bare name-and-URL it will give the O4 coder something to work
+with before they open the site.
+
+**Does not give:** headquarters, founding year, legal form, staff, or any
+contact detail. Every descriptive field on the instrument comes from the
+organization's own materials at O4.
+
+**Not institutions.** Unlike PIT-UN and FORD, this frame lists organizations
+directly, so `lists_institutions` is false and records do not arrive PENDING
+for Rule 1. Rule 1 still applies where a record turns out to be a fiscally
+sponsored project or a program inside a larger body; that is decided
+case by case at O3, not flagged in advance.
+
+## 5. Rule 2: Fast Forward itself
+
+Fast Forward operates this frame and therefore enters the candidate pool by
+construction as a Rule 2 operator, screened on C1–C5 and coded on the full
+instrument like any other record, flagged as an operator, and **excluded from
+every within-block rate and from the saturation count** because its inclusion
+is guaranteed rather than sampled.
+
+No author conflict is known for this frame. Unlike ACT and PIT-UN, no member of
+the team holds a role at Fast Forward or at any portfolio organization so far
+as is known; if that changes, the Conflicts of Interest procedure applies.
+
+## 6. Expected overlap within Block C
+
+Fast Forward's accelerator is funded in part by Google.org, and the Patrick J.
+McGovern Foundation is among its funders. Some portfolio organizations are
+therefore plausibly also McGovern grantees or Google.org cohort members.
+
+All three are Block C, so these records do not enter the multi-frame subset
+used in sensitivity check (f), which requires frames from two or more blocks.
+Multi-frame provenance is retained in the data.
+
+Frame redundancy within the block is reported as description and **is not
+compared across blocks** as evidence of relative population size — the register
+names this case directly, since a funder that supports the accelerator whose
+portfolio the other frame enumerates manufactures overlap independently of
+field size.
+
+## 7. Still to do for this frame
+
+- [x] Capture 102 organizations from `?portfolio=true` (2026-09-24)
+- [x] `primary.txt` naming `ffwd_portfolio.csv`
+- [x] Wayback `?portfolio=true` page 1 → `wayback.txt` (2026-09-24). The
+      filtered URL, not `/directory`.
+- [ ] Archive pages 2-11. Page 1 covers 10 of 102 organizations; the listing
+      paginates at 10 per page and each page is a distinct URL
+      (`&page=2` … `&page=11`). The page-1 header showing "102 results" is
+      third-party evidence of the frame's SIZE, but the membership is not
+      archived. Same treatment as PIT-UN, where all directory pages were
+      archived separately.
+- [ ] Map columns in `frames.json`: `name`, `website_url`, `listing_text`.
+      Leave `location` unmapped — the regions field is beneficiary geography
+      (§2).
+- [ ] Run `capture_log.py log` once all frames are captured

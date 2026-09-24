@@ -1,0 +1,45 @@
+# ACT — archived captures
+# One URL per line. Lines beginning with # are notes and are ignored by
+# capture_log.py, which reads the first non-comment line as the frame's
+# archive reference.
+
+# --- The pinned member list, archived at its pinned commit ---------------
+# Saved 2026-09-24 07:04 UTC = 03:04 EDT. Wayback timestamps are UTC, so this
+# carries a later clock time than the capture session; same session.
+https://web.archive.org/web/20260924070442/https://raw.githubusercontent.com/civictechnologists/website/c18a8b03a798c54e0cb3ac7465b945915480a42e/_data/members.yml
+
+# WHY THIS TARGET RATHER THAN THE RENDERED PAGE
+#
+# The commit SHA and a page snapshot each fix something the other does not,
+# and this URL is the one that does both.
+#
+#   The SHA (c18a8b0...) pins exact CONTENT. Anyone can check act_members.yml
+#   against that commit byte for byte, which no snapshot of a rendered page
+#   supports. But it only resolves while GitHub hosts the repository: if ACT
+#   deletes it, makes it private or force-pushes, the pin points at nothing and
+#   the independent verification route is gone, even though the local copy
+#   survives.
+#
+#   A Wayback snapshot is DURABLE but, taken of the rendered /about page, fixes
+#   a presentation rather than a file.
+#
+# Archiving the raw file AT the pinned commit gives both: the exact bytes of
+# the frame of record, held by a third party, independent of GitHub's continued
+# hosting.
+#
+# The same move is worth making for CFA's organizations.json at its commit —
+# it is the only other frame in the register pinned to a SHA and carries the
+# same exposure.
+
+# --- Not archived, and why -----------------------------------------------
+#
+# The rendered page, https://www.civictechnologists.org/about#organizations, is
+# not archived. It is the public presentation of the file above, and the file
+# is the capture.
+#
+# One small thing this leaves open: the deployed site builds from a branch, so
+# in principle the rendered page could lag the pinned commit. Nothing observed
+# suggests it does — the 18 members read from the live page on the capture date
+# match the pinned file — but that comparison was made by reading, not by
+# archiving, and is recorded here rather than evidenced. Archiving the rendered
+# page would close it if it ever matters.

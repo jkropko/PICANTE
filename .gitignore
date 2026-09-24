@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# Data
+*.csv
+
 # Distribution / packaging
 .Python
 build/
@@ -216,3 +219,17 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+#Snapshot data
+# Captured frame contents — not redistributed.
+# Every frame's data stays local and goes to OSF; the record of HOW it was
+# captured stays in git. See each frame's notes.txt.
+organizations/snapshots/**
+!organizations/snapshots/*/
+!organizations/snapshots/*/notes.txt
+!organizations/snapshots/*/wayback.txt
+!organizations/snapshots/*/primary.txt
+!organizations/snapshots/*/commit.txt
+!organizations/snapshots/*/README.md
+!organizations/snapshots/*/*.py
+!organizations/snapshots/*/*_manifest.json

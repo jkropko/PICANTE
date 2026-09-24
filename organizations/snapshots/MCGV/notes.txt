@@ -1,0 +1,199 @@
+# MCGV — capture notes
+
+Frame: Patrick J. McGovern Foundation grantee listing (Block C).
+Captured: 2026-09-24. Register freeze date: [RECORD HERE].
+Captured by: J. Kropko.
+
+---
+
+## 1. Route
+
+Registered route followed. The grants database at
+`https://www.mcgovern.org/grants/` offers a **"Download as CSV file"** control,
+so the frame was captured as a single export rather than scraped: **890 grant
+rows**, matching the site's 89 listing pages at 10 per page.
+
+Columns: `Grantee`, `Fiscal Sponsor`, `Grant`, `Amount`, `Focus Area`,
+`Location`, `Date`.
+
+**890 against the register's 795.** The register's figure came from the 990-PF
+grantee database. The live database covers July 2017 to now and is updated
+weekly, so it runs ahead of the tax filings. Not a discrepancy — different
+sources, and the live database is the one the register names.
+
+**Captured unfiltered.** The register names no focus-area filter for this
+frame, unlike FORD. Focus areas include McGovern's legacy brain-research
+giving — Neuroscience, Legacy, DAF, Matching Gift, N/A — which C3 removes by
+asking whether the core activity survives without the technology. That judgment
+belongs to the criterion, not to a capture-time filter.
+
+## 2. The CSV has no URL column, and the gap was closed separately
+
+The export gives no website for any grantee. The rendered listing pages do
+carry a link on every grantee card, so those 89 pages were fetched and the URLs
+joined back on by `mcgv_urls.py` (kept in this directory), producing
+`mcgv_grantee_urls.csv` with `Grantee`, `website_url` and `url_source`.
+
+This was not optional. `website_url` does two jobs downstream and a blank
+breaks both: it is where C1 and C2 start at O4, on the largest frame in the
+register, and at O5 the lexicon proxy FETCHES it and pattern-matches the frozen
+lexicon against the page. With nothing to fetch, the proxy returns undetermined
+and every record has to be resolved by hand before the coding queue can be
+built.
+
+**Result.** 450 distinct grantees; **334 have a website in the frame** (267 as
+absolute URLs, 67 as bare domains), **116 do not** — their card carries a
+`grantee-website` anchor with no href at all. Among those without: University
+of Southampton, Jhpiego Corporation, Bird Story Agency, Brain Builders Youth
+Development Initiative, Native BioData Consortium, ReFED, Open Climate Fix,
+OceanMind.
+
+**The join is exact: all 450 CSV grantee names were found in the listing
+pages, with zero mismatches.** The export and the rendered listing are
+evidently generated from the same source rather than maintained separately,
+which is worth knowing — it means the CSV can be trusted as a complete
+rendering of what the pages show.
+
+### A defect in the frame, recorded because it misled an earlier pass
+
+McGovern writes many grantee links as a **bare domain with no scheme**:
+
+    <a class="grantee-website" href="cworthy.org"></a>
+
+A scheme-less href resolves relative to the current page, so a browser turns
+that into `mcgovern.org/grants/cworthy.org` — a dead link. **Those grantee
+links are broken on McGovern's own site.** The domain in the attribute is
+correct; only the missing scheme is wrong, so the site's defect costs this
+study nothing once read from the source and given a scheme. 67 of 334
+recovered URLs came this way.
+
+This is recorded because it produced a false explanation before it produced a
+correct one. An early fetch of the rendered page showed URLs of the form
+`mcgovern.org/grants/cworthy.org`, and these notes briefly described McGovern
+as "encoding the grantee's domain in its own URLs" — a site convention that
+does not exist. Those URLs were a **browser artifact of relative resolution**,
+not something in the markup. The first version of `mcgv_urls.py` was written
+against that misreading and, combined with a wrong assumption about where the
+anchor sits in the card, recovered 6 names across 89 pages instead of 450.
+
+The parser now reads the card's own classes — `article.grants-tease`,
+`h2.grantee-name`, `a.grantee-website` — rather than inferring structure from a
+rendered view.
+
+**What is never recorded as a grantee's website is a mcgovern.org URL.** It is
+the funder's own page, and at O5 the lexicon proxy would score the FUNDER's
+vocabulary instead of the grantee's, filing the record in the wrong stratum for
+a reason having nothing to do with how the organization describes itself — the
+same mistake that put pit-un.org into PIT-UN's `website_url`.
+
+**`url_source` records how each URL was obtained**, because the three cases are
+not equally strong evidence: an absolute URL is what the frame published, a
+bare domain is what the frame meant to publish, and a blank is what the frame
+does not have. The 116 blanks are left blank rather than guessed; C1 and C2 are
+determined at O4 from the organization's own materials.
+
+## 3. What to expect at screening
+
+**Heavy repetition — the unit is grants, not organizations.** 890 grants
+resolve to **450 distinct grantee names**, about two grants each — lower than
+the register's estimate of 3-7 relationships per organization, which was drawn
+from the 990-PF data over a different span. Note this is a count of distinct
+NAMES; deduplication at O3 may reduce it further where one organization is
+named inconsistently across grants. MIT, Trek Medics,
+CarbonPlan, Blue Star Families, Materiom, Upsolve, Jhpiego, Poynter, Givedignifiedwork
+(Karya) and The Conversation each appear several times in the first two years
+alone; MIT at least four times. The reader collapses these to organizations
+with a `grant_count`, so 890 grants will yield far fewer organizations. The
+register's estimate of 3–7 relationships per organization looks right.
+
+**Heavy fiscal sponsorship.** Convergent Research, FFWD (Fast Forward), GDI
+Solutions, Social Good Fund, New Venture Fund, Allied Media Projects, Community
+Initiatives, Mantra4Change US, Africa No Filter Foundation, Edward Charles
+Foundation, Global Impact, Sand County Foundation, Res Non Verba, National
+Center for Civic Innovation and Social Science Research Council all appear in
+the Fiscal Sponsor column. Every one fires the Rule 1 fiscal-sponsor clause at
+O3: resolve to the sponsored project if the frame names it and it meets C1
+independently, otherwise to the sponsor, recording the routing — never both.
+
+**Heavy C2 attrition.** The most international frame in the register by a wide
+margin: GBR, KEN, IND, BRA, CHE, ARG, COL, DEU, FRA, ZAF, NGA, ETH, PAK, AUT,
+CHL, NCL and more. The foundation's own 2025 announcement described 149 grants
+across 13 countries.
+
+**Institutions appear, so Rule 1 applies case by case.** MIT, Northeastern,
+Brown, The George Washington University, UCSF Foundation, Lahore University of
+Management Sciences, University of Southampton. `lists_institutions` is false
+for this frame — most grantees are organizations — so records do not arrive
+PENDING in bulk; the institutional ones are resolved individually at O3.
+
+## 4. Location is the grantee's, not the beneficiary's
+
+Unlike Fast Forward, whose Regions field records where the work lands, this
+frame's `Location` is the grantee's own location as the funder records it:
+"Boulder, CO, USA", "Nairobi, 110, KEN", "London, LND, GBR". Mapped, and much
+closer to C2 than FF's field.
+
+Still not C2. It is the funder's record of the grantee, and C2 is a human
+determination at O4 from the organization's own materials. No location filter
+was applied at capture. Consistent with CTFG's missing country field, the CFA
+location rule, PIT-UN's regional hubs and FF's regions.
+
+## 5. Observed Block C overlap
+
+**FFWD (Fast Forward) appears here twice as a grantee** — 2024 and 2025,
+$500,000 each — **and as a fiscal sponsor** for Materiom C.I.C. and Climate
+Cabinet Education. The Block C overlap anticipated in `../FF/notes.txt` §6 is
+therefore observed rather than predicted.
+
+Within block, so these records do not enter the multi-frame subset used in
+sensitivity check (f), which requires frames from two or more blocks.
+Multi-frame provenance is retained in the data. Frame redundancy within Block C
+is reported as description and is not compared across blocks as evidence of
+relative population size — the register names this case directly, since a
+funder that supports the accelerator whose portfolio another frame enumerates
+manufactures overlap independently of field size.
+
+One record worth noting in advance: the **Public Interest Technology (PIT)
+Infrastructure Fund** appears as a 2024 grantee, fiscally sponsored by New
+Venture Fund. A PIT-named entity surfacing through a Block C funder portfolio
+is exactly the kind of cross-tradition blur RQ5 exists to find. It is recorded
+here as an observation, not as a finding; it will be screened and coded like
+any other record.
+
+## 6. Archiving, and a limitation stated plainly
+
+Four of 89 pages are archived (see `wayback.txt`): page 1 for size, page 2 for
+recency, page 49 for the midpoint, page 89 for depth back to 2017.
+
+A Wayback save of the **CSV endpoint was attempted first and failed** — the
+download control carries an empty href, so the file is assembled client-side
+with no stable URL for the archive to fetch. That attempt is recorded because
+it explains why the weaker route was used.
+
+**This frame is updated WEEKLY**, the fastest-moving in the register. A
+re-fetch a month from now returns a materially different set. The archive is
+therefore doing more work here than anywhere else, and four pages is thin: a
+reader can verify the frame's shape and span from a third party, but not its
+contents. The downloaded CSV, hashed in `capture_log.json` and deposited on
+OSF, is the record of this frame.
+
+## 7. Rule 2: the McGovern Foundation itself
+
+PJMF operates this frame and enters the candidate pool by construction as a
+Rule 2 operator, screened on C1–C5 and coded on the full instrument like any
+other record, flagged as an operator, and excluded from every within-block rate
+and from the saturation count because its inclusion is guaranteed rather than
+sampled.
+
+No author conflict is known for this frame.
+
+## 8. Still to do for this frame
+
+- [x] Download the grants CSV (890 rows, 2026-09-24)
+- [x] Archive 4 of 89 listing pages; CSV endpoint attempted and failed (§6)
+- [x] Recover grantee websites with `mcgv_urls.py` (§2): 334 of 450 have one;
+      the join matched all 450 names exactly
+- [ ] `primary.txt` naming the grants CSV. This directory will hold the CSV,
+      `mcgv_grantee_urls.csv` and two manifests, so the frame of record must be
+      named explicitly or `capture_log.py` will refuse to guess.
+- [ ] Run `capture_log.py log` once all frames are captured

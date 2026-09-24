@@ -1,0 +1,141 @@
+# CFA — capture notes
+
+Frame: Code for America brigade roster, archived (Block B).
+Captured: 2026-09-23/24. Register freeze date: [RECORD HERE].
+Captured by: J. Kropko.
+
+---
+
+## 1. Route
+
+Registered route followed without deviation, in the strongest available form.
+The roster is version-controlled, so the frame is pinned to a **commit SHA
+rather than a date**:
+
+    repository  https://github.com/codeforamerica/brigade-information
+    commit      6c5654c7fd9b9f9f236fcf6687d91f422efec050
+    file        organizations.json
+
+Archived at the commit URL on 2026-09-24 (see `wayback.txt`), so the roster
+survives the repository.
+
+**Capture mechanics.** The clone was made inside `snapshots/CFA/`, the SHA
+recorded to `commit.txt`, `organizations.json` copied out, and the clone's
+`.git` directory removed. A nested git repository would not have been tracked
+as ordinary files by the project repository, and a submodule would have left
+the data outside it — neither acceptable for a frozen snapshot that must
+survive independently of upstream. The SHA in `commit.txt` preserves the
+provenance without the dependency; `capture_log.py` reads it from there.
+
+## 2. A historical frame, and the only one that can do this job
+
+Code for America **sunset the Brigade Network in June 2023**. This frame is
+registered as historical precisely for that reason: it is the only source in
+the register that supplies organizations which have closed, gone dormant, or
+carried on independently after their network ended.
+
+The register's decision not to gate on recent activity depends on this frame.
+Organizational status — active, dormant, closed — is coded as a variable with a
+date and a dated evidence artifact rather than used as a screening criterion,
+because gating on activity would bias the sample toward survivors and make
+claims about field dynamics impossible. Most of the dormant and closed records
+in this study will come from here.
+
+Expect a high closure rate, and treat it as a finding rather than as attrition.
+
+## 3. Boundary: the location rule, decided before capture
+
+Decided 2026-09-16 and recorded in `frames.json` under
+`frames.CFA.boundary.location_rule`: **`drop_clearly_non_us`**.
+
+Records whose location reads US, **and records whose location cannot be
+determined from the roster's city string**, stay inside the frame. Only records
+a location string positively identifies as non-US are dropped at enumeration.
+
+The reasoning, in short: C2 is a human determination made at O4 from the
+organization's own materials, and it exists because frame location metadata is
+unreliable. The CTFG boundary already embodies this by retaining
+country-missing records. Applying the same logic here keeps the registered
+division of labour intact rather than letting a string match at enumeration
+pre-empt a criterion assigned to a coder.
+
+The cost is that the enumerated count will exceed the register's "~125 US (of
+221)" estimate, which assumed a US filter at capture. That estimate predates
+anyone parsing the city strings and is not a commitment; every boundary drop is
+logged, and each retained undeterminable record costs one manual C2
+determination at O4.
+
+What it protects: a brigade with a messy or missing city string is likely a
+small volunteer group with a thin web presence — the tier-2 organizations that
+do the work without the field vocabulary, which the draw rule goes out of its
+way to reach before sampling can stop.
+
+## 4. OUTSTANDING: the tag vocabulary is not confirmed
+
+The file is not brigades only. The register records that it also holds 18F,
+Code for All members, German OK Labs, Code for Poland and government entities,
+and that of 221 records roughly 181 carry a Brigade tag.
+
+`frames.json` currently carries placeholder tag rules —
+`include_any: ["Brigade"]`, `exclude_any: ["Code for All", "Government"]` —
+which are **guesses, not observations**. The reader refuses to run on an empty
+`include_any`, but it cannot tell a wrong tag from a right one.
+
+Before enumerating:
+
+    python enumerate_o3.py inspect --frame CFA --file snapshots/CFA/organizations.json
+
+That prints the full tag inventory with counts. Set `include_any`,
+`exclude_any` and `independence_tags` from what is actually there, and record
+the inventory here.
+
+This is the one thing standing between this frame and O3.
+
+## 5. Expected overlap with ACT
+
+ACT is the successor network to the sunset Brigade program. Several ACT
+members are plausibly on this roster too — the two frames describe the same
+tradition a few years apart.
+
+Both are Block B, so these records do not enter the multi-frame subset used in
+sensitivity check (f), which requires frames from two or more blocks. Their
+multi-frame provenance is retained in the data.
+
+Frame redundancy between them is reported per block as description and **is not
+compared across blocks** as evidence of relative population size. The register
+names this case explicitly: a successor network to a sunset one manufactures
+overlap independently of field size.
+
+One thing the overlap does support, and it is worth stating because it is a
+finding rather than an artifact: an organization on the 2023 brigade roster
+that is also a 2026 ACT member has survived its network's closure and rejoined
+a successor. That is field dynamics, visible only because the register carries
+a historical frame alongside a current one.
+
+## 6. Downstream notes
+
+- The roster carries `previous_names`, captured and retained. It is how a
+  brigade that renamed itself after the sunset is recognised as the same
+  organization at deduplication.
+- Independence tags (Official, Partner, Fiscally Sponsored, or whatever the
+  inventory shows) are recorded per record. A fiscally sponsored brigade
+  engages the Rule 1 fiscal-sponsor clause: resolve to the sponsored project if
+  the frame names it and it meets C1 independently, otherwise to the sponsor,
+  recording the routing. Never enter both.
+- City strings are inconsistent and are normalised for comparison only; the
+  raw value is retained on every record.
+
+## 7. Still to do for this frame
+
+- [x] Clone, pin to commit 6c5654c7fd9b9f9f236fcf6687d91f422efec050, strip
+      `.git`, record SHA in `commit.txt`
+- [x] Archive `organizations.json` at its pinned commit → `wayback.txt`
+      (2026-09-24)
+- [x] Decide the location rule — `drop_clearly_non_us`, 2026-09-16 (§3)
+- [ ] **Confirm the tag vocabulary** with `inspect` and set `include_any`,
+      `exclude_any`, `independence_tags` in `frames.json` (§4)
+- [ ] Map the remaining columns in `frames.json` against the real field names
+      (`name`, `website`, `city`, `tags`, `previous_names` are the current
+      guesses)
+- [ ] `primary.txt` naming `organizations.json`
+- [ ] Run `capture_log.py log` once all frames are captured

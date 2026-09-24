@@ -1,0 +1,268 @@
+# FORD — capture notes
+
+Frame: Ford Foundation Technology and Society grantee portfolio (Block A).
+Captured: 2026-09-23. Register freeze date: [RECORD HERE].
+Captured by: J. Kropko.
+
+---
+
+## 1. The registered enumeration route does not exist as described
+
+The register describes this frame as "manual export of the topic-filtered
+view (Technology and Society, US)". No such filter is available.
+
+What the grants database actually offers, verified on the capture date:
+
+- The filter panel exposes **Approval date** and **Amount** only. No topic,
+  program, or location facet is rendered, although the page's own JSON payload
+  declares labels for all of them (`grantSubjectLabel: "Topic"`,
+  `programsLabel: "Program"`, `grantLocationLabel: "Benefiting location"`).
+  The facets array in the payload is empty.
+- The search box matches **grantee names only**. Searching "Technology and
+  Society" returns 3 grants, all of which have "Society" or "Technology" in the
+  organization's name and none of which are in the program.
+- The program appears only as a **field on each grant record**, not as
+  anything selectable.
+- There is **no export control** of any kind.
+
+Conclusion: the topic-filtered export the register assumes cannot be produced
+through the interface. The frame was captured by a different route and the
+narrowing moved from capture time to enumeration time. This is a method
+deviation and is recorded for the next preregistration update. The frame's
+identity and intent are unchanged: it is still Ford's Technology and Society
+grantmaking.
+
+## 2. Access route used
+
+Attempted and rejected:
+
+- `/wp-json/ford/v1/grants` — returns 401 `rest_authorization_required`. The
+  WordPress REST namespace is locked. Its route index is public and shows the
+  grants collection accepts only `page`, `per_page` (max 100), `search`,
+  `orderby`, `order`, `after`, `before`, `amount_min`, `amount_max`. **There is
+  no program, subject or location parameter at the API level either**, which
+  independently confirms that filtering at capture was never possible.
+- `/grant-api` — returns the ford/v1 namespace index, not grant data.
+
+Used: **the rendered HTML documents**. The grants database is server-rendered;
+each page embeds its complete JSON payload in a
+`<script type="application/json">` block inside `<div class="grants-db">`. The
+head carries `<link rel="next" href=".../page/2/">`, confirming server-side
+pagination.
+
+Gate: the database sits behind **Cloudflare Turnstile**. The clearance was
+obtained **manually, by a human passing the check in a browser**; the resulting
+cookies (`cf_clearance`, `ford_gd_ts_verified`, `__cf_bm`) were then reused for
+the scripted fetch. No attempt was made to solve, bypass, or forge the
+challenge. Requests were sent with the browser's own User-Agent because a
+Turnstile clearance is bound to the User-Agent that earned it; the identifying
+PICANTE User-Agent could not be used for this reason.
+
+Rate: 3-second delay between requests, 44 requests total.
+
+Tool: `ford_fetch.py fetch-html`, pagination mode `query`
+(`?page=N&per_page=100`), verified before capture.
+
+**Third-party archiving also failed, for the same reason.** A Wayback Machine
+save of the grants database was attempted on the capture date and returned the
+Turnstile gate, not the database. The evidence is in the resources the save
+pulled in — the Cloudflare challenge widget's own scripts, carrying the same
+site key as the gate markup — rather than the theme assets and embedded grants
+payload a real snapshot would have fetched. Snapshot:
+https://web.archive.org/web/20260924002149/https://www.fordfoundation.org/work/our-grants/awarded-grants/grants-database/
+(timestamp is UTC; 20:21 EDT on 2026-09-23, the capture session date.)
+
+This is a property of the frame, not an accident of timing, and it bears
+directly on reproducibility: the gate that made scripted access difficult also
+prevents anyone else archiving the frame independently. The snapshot stands as
+dated third-party evidence that the database was gated on that date. It is not
+an archived copy of the frame's contents and must not be cited as one. See
+wayback.txt.
+
+**Consequence: this capture is the only record of the frame's contents.** For
+every other frame in the register the Wayback snapshot is a second, independent
+copy. Here it is not. `snapshots/FORD/raw/` cannot be reconstructed later — the
+database is live and third parties cannot archive it — so it must be backed up
+off the working machine and deposited on OSF before enumeration begins.
+
+## 3. Capture result
+
+- **4,319 unique grants**, matching the site's own reported total exactly.
+- 44 pages, 100 per page.
+- Year range 2011–2026.
+- 2,818 distinct grantees reported by the site.
+- **No filter applied at capture.** The whole database was taken; the boundary
+  is applied at enumeration, per `frames.json`.
+
+## 4. A failed first capture, recorded because it nearly passed
+
+The first attempt used `/page/N/?per_page=100`. The site **ignores the path
+page number when a per_page query parameter is present** and returns page 1
+every time. The run completed normally: 44 pages, 4,400 rows, a clean progress
+bar, and a mismatch warning (4,400 vs 4,319) that read like an off-by-something
+rather than total failure. Only deduplication at the flatten step revealed
+**100 unique grants**, all from 2025–26 — page 1, captured 44 times.
+
+Had this gone unnoticed, the FORD frame would have entered O3 as 100 recent
+grants standing in for a 15-year database, and would have looked thin rather
+than broken.
+
+The bad capture was deleted and the tool amended: it now tests three pagination
+shapes against page 2 by comparing grant IDs before fetching anything, and
+stops immediately if any page contains no records it has not already seen.
+
+## 5. Two-source frame: 990-PF source DROPPED
+
+**Decision: 2026-09-23, lead reviewer. The 990-PF tail is not captured. The
+FORD frame is enumerated from the live grants database alone.**
+
+The register defines FORD as a two-source frame — the live database plus the
+990-PF filings from 2011 onward — on a stated reasoning: the live database
+shows only active grants, so grants that closed years ago appear only in the
+filings.
+
+**The capture disproves that reasoning.** The database's own payload reports
+`min_year: 2011`, and the capture returned 4,319 grants spanning 2011–2026,
+including long-closed ones. Grants do not leave the database when they end. The
+premise the second source rested on is false, so the source is dropped.
+
+This is a correction rather than a reduction in scope: what is being removed is
+a source justified by a property the frame does not have.
+
+**What is NOT claimed.** We have not established that the 990-PF filings would
+have added nothing. That was not measured, and the claim is deliberately not
+made. What is established is that the registered justification does not hold.
+
+**A known limitation, recorded rather than resolved.** Ford's 990-PF filings
+may reach further back than the live database. The database's approval-date
+facet carries a 2006 placeholder, and the register itself notes that grants
+from 2006–2018 carry the "Other Grantmaking" label — both suggesting Ford's
+records begin around 2006 while this capture begins at 2011. If so, dropping
+the filings trades roughly five years of historical depth. That possibility was
+not tested against an actual filing before the decision was taken. It is
+recorded here so the trade is visible rather than implied, and so a reader can
+weigh it. Anyone wishing to close it can open a 2011 filing and check whether
+its grant schedule names grantees absent from `ford_grants_live_database.csv`.
+
+**Consequences.**
+
+- All rows carry `source_route = live_database_2026-10-01`. The `source_route`
+  column is RETAINED in the codebook and in `frames.json` even though it now
+  takes a single value, so that the filings can be added later without a schema
+  change and so the field's presence records that a second source was
+  contemplated.
+- `frames.json`: the FORD `_two_source` note is rewritten to record the drop.
+- Frame register (workbook sheet 2): the FORD enumeration route is amended to
+  the live database alone.
+- This is a deviation from the registered design and is recorded for the next
+  preregistration update alongside the enumeration-route deviation in §1.
+
+## 6. Boundary — DECIDED
+
+**Decision: 2026-09-23, lead reviewer, before any record was screened or coded.
+A grant is inside the FORD frame if its program is Technology and Society OR it
+carries a Technology subject.** Approximately 618 grants, collapsing to fewer
+organizations once grants are deduplicated at O3.
+
+Rule as implemented in `frames.json`:
+
+    program_slug == "technology-and-society" OR "technology" in subject_slugs
+
+### What the capture measured
+
+Of 400 grants Ford itself tags with a **Technology** subject:
+
+| Program label | Technology-subject grants |
+|---|---|
+| Technology and Society | 320 |
+| Civic Engagement and Government | 70 |
+| Other Grantmaking | 42 |
+| Future of Work(ers) | 35 |
+| Gender, Racial, and Ethnic Justice | 23 |
+| Natural Resources and Climate Justice | 6 |
+| Creativity and Free Expression | 5 |
+| Disability Rights | 3 |
+| Mission Investments | 2 |
+| Global Governance | 1 |
+
+The Technology and Society program holds **338 grants, 2017–2025**. Other
+Grantmaking is a residual label: Ford's program structure dates from 2018, and
+earlier grants that did not map onto it carry it whatever they funded.
+
+### Why the wider boundary
+
+The registered purpose is Ford's technology-and-society grantmaking, not its
+Technology and Society budget line. **80 technology-subject grants sit in
+current programs other than Technology and Society** — 70 of them in Civic
+Engagement and Government, which is squarely the tradition Block A exists to
+cover. Those are not a labelling artifact; they are grants Ford tags as
+technology while funding them from a different program budget. Discarding them
+on an internal accounting distinction would mean the frame reflects Ford's
+budget structure rather than its technology grantmaking.
+
+A further **42** sit under Other Grantmaking and carry the frame's pre-2018
+historical depth, which is the property Block A wanted from this frame in the
+first place.
+
+### What it admits, and what removes it
+
+The wider boundary admits grants whose technology tag is incidental to the
+organization's work. **That is what C3 (constitutive technology) exists to
+remove** — take the technology away and ask whether the core activity survives.
+The boundary hands that judgment to the registered criterion rather than
+pre-empting it with a program label, which is the same reasoning used for the
+CTFG country-missing records and the CFA `location_rule`. Expect heavier C3
+attrition in this frame than in an identity frame; that is the design working.
+
+### What it costs
+
+A larger screening load, and a frame whose composition depends on Ford's own
+subject tagging — which the study does not control and cannot audit. Recorded
+as a limitation rather than resolved.
+
+### Reported as a bound
+
+Both counts are reported in the write-up as a measured bound on frame
+completeness: **338 under a program-only boundary, ~618 under the chosen rule.**
+The difference, 280 grants, is the quantity at stake in the choice. This is the
+same move as the CTFG boundary audits. The enumerator emits these counts per
+run — `grants_in_program`, `grants_by_subject_only`, and
+`_narrower_boundary_would_have_held` — so the bound is recomputed from the data
+rather than transcribed from this note.
+
+## 7. Downstream notes
+
+- Ford is flagged `lists_institutions`, so every record arrives `PENDING` for
+  Rule 1 unit resolution. Ford funds programs inside universities and large
+  nonprofits; each resolves to the unit the frame names, never to the parent.
+  Expect a long worksheet — that is the rule working, not a problem.
+- Grants collapse to organizations at enumeration with a `grant_count`.
+- Any row naming a fiscal sponsor is flagged for the Rule 1 fiscal-sponsor
+  clause.
+- No location filter was applied at capture. C2 is a human determination at O4
+  from the organization's own materials, consistent with the CTFG boundary and
+  the CFA `location_rule` decision.
+
+## 8. Still to do for this frame
+
+Done:
+
+- [x] Capture the live grants database (4,319 grants, 2026-09-23)
+- [x] Attempt a Wayback capture — gated; recorded in §2 and wayback.txt
+- [x] Decide the 990-PF question — DROPPED, §5
+- [x] Decide the boundary — program OR technology subject, §6
+- [x] Map FORD's columns in `frames.json`, including `program_slugs` and
+      `subject_slugs`, which the boundary rule selects on
+
+Outstanding, all blocking enumeration of this frame:
+
+- [ ] **Back up `snapshots/FORD/` off this machine and deposit on OSF.** Higher
+      priority here than for any other frame, because the archive route failed
+      and this capture is irreplaceable (§2).
+- [ ] Run `capture_log.py log` once all frames are captured
+
+For the next preregistration update, this frame contributes two deviations —
+the enumeration route (§1) and the 990-PF source (§5) — plus the
+reproducibility limitation in §2. Both were discovered at capture, before any
+screening or coding, and both are corrections to registered elements whose
+stated basis did not survive contact with the source.

@@ -83,11 +83,40 @@ class ConfigError(RuntimeError):
 
 # ----------------------------------------------------------------- utilities
 
-def read_rows(path: str | Path) -> list[dict]:
-    """CSV or JSON array of objects. Anything else is an error, loudly."""
+def read_rows(path) -> list[dict]:
+    """CSV or JSON array of objects. Anything else is an error, loudly.
+
+    Accepts a list of paths as well as one. Ford is a two-source frame — the
+    live topic-filtered database plus the 990-PF tail — and its rows arrive in
+    two files that have to be read as one frame.
+    """
+    if isinstance(path, (list, tuple)):
+        rows: list[dict] = []
+        for p in path:
+            rows.extend(read_rows(p))
+        return rows
     p = Path(path)
     if not p.exists():
         raise ConfigError(f"snapshot not found: {p}")
+    if p.suffix.lower() in (".yml", ".yaml"):
+        try:
+            import yaml
+        except ImportError as e:
+            raise ConfigError(
+                f"{p} is YAML and PyYAML is not installed. Either `pip install pyyaml` or "
+                f"convert the file to CSV/JSON at capture. Do not rename it: the reader "
+                f"chooses by suffix, and a YAML file named .csv parses as one long broken "
+                f"row."
+            ) from e
+        data = yaml.safe_load(p.read_text(encoding="utf-8"))
+        if isinstance(data, dict):
+            for key in ("organizations", "records", "data", "items", "members"):
+                if isinstance(data.get(key), list):
+                    data = data[key]
+                    break
+        if not isinstance(data, list):
+            raise ConfigError(f"{p}: expected a YAML list of mappings")
+        return [r for r in data if isinstance(r, dict)]
     if p.suffix.lower() == ".json":
         data = json.loads(p.read_text(encoding="utf-8"))
         if isinstance(data, dict):
@@ -365,6 +394,23 @@ def read_grants(fc: str, cfg: dict, path, as_of: str) -> FrameResult:
     c_route = _col(cols, "source_route", required=False)
     c_sponsor = _col(cols, "fiscal_sponsor", required=False)
     c_txt = _col(cols, "listing_text", required=False)
+    c_prog = _col(cols, "program_slugs", required=False)
+    c_subj = _col(cols, "subject_slugs", required=False)
+
+    b = cfg.get("boundary") or {}
+    want_prog = b.get("program_slug")
+    want_subj = b.get("subject_slug") if b.get("include_technology_subject") else None
+    if want_prog and not c_prog:
+        raise ConfigError(
+            f"{fc}: the boundary selects on program '{want_prog}' but no program_slugs column "
+            f"is mapped. Without it every grant would pass and the frame would be the funder's "
+            f"whole portfolio."
+        )
+    if b.get("include_technology_subject") and not c_subj:
+        raise ConfigError(
+            f"{fc}: the boundary includes grants by subject but no subject_slugs column is "
+            f"mapped."
+        )
 
     if fc == "FORD" and not c_route:
         raise ConfigError(
@@ -378,6 +424,7 @@ def read_grants(fc: str, cfg: dict, path, as_of: str) -> FrameResult:
     counts: dict[str, int] = {}
     routes: dict[str, set] = {}
     rows_read = 0
+    boundary_program_only = boundary_subject_only = boundary_both = 0
 
     for i, row in enumerate(read_rows(path), start=1):
         rows_read += 1
@@ -385,6 +432,29 @@ def read_grants(fc: str, cfg: dict, path, as_of: str) -> FrameResult:
         if nz.is_blank(name):
             res.dropped.append({"frame": fc, "row": i, "reason": "grant row names no grantee"})
             continue
+        # Frame boundary, applied here rather than at capture: the source
+        # offers no filter, so the narrowing lives in config where it is
+        # deterministic and its cost is measurable.
+        if want_prog:
+            progs = {s.strip().lower() for s in _get(row, c_prog).split(";") if s.strip()}
+            subjs = {s.strip().lower() for s in _get(row, c_subj).split(";") if s.strip()} \
+                if c_subj else set()
+            in_program = want_prog.lower() in progs
+            in_subject = bool(want_subj) and want_subj.lower() in subjs
+            if not (in_program or in_subject):
+                res.dropped.append({
+                    "frame": fc, "row": i, "name": name,
+                    "reason": f"outside the frame boundary (programs={sorted(progs)}, "
+                              f"subjects={sorted(subjs)})",
+                })
+                continue
+            if in_program and in_subject:
+                boundary_both += 1
+            elif in_program:
+                boundary_program_only += 1
+            else:
+                boundary_subject_only += 1
+
         url = _get(row, c_url)
         key = nz.normalize_name(name) or f"row{i}"
         dom = nz.registrable_domain(url)
@@ -441,6 +511,18 @@ def read_grants(fc: str, cfg: dict, path, as_of: str) -> FrameResult:
         "dropped": len(res.dropped),
         "fiscal_sponsor_flagged": n_sponsored,
     }
+    if want_prog:
+        grants_in = boundary_program_only + boundary_subject_only + boundary_both
+        res.stats.update({
+            "boundary_rule": b.get("rule", ""),
+            "grants_inside_boundary": grants_in,
+            "grants_in_program": boundary_program_only + boundary_both,
+            "grants_by_subject_only": boundary_subject_only,
+            "_narrower_boundary_would_have_held": boundary_program_only + boundary_both,
+            "_note": "grants_in_program is what a program-only boundary would have captured; "
+                     "grants_by_subject_only is what the chosen wider boundary adds. Report "
+                     "both as a measured bound on frame completeness.",
+        })
     return res
 
 
@@ -456,7 +538,20 @@ def read_frame(frame_code: str, cfg: dict, path, as_of: str) -> FrameResult:
     reader = READERS.get(cfg.get("reader", "generic"))
     if reader is None:
         raise ConfigError(f"{frame_code}: unknown reader '{cfg.get('reader')}'")
-    return reader(frame_code, cfg, path, as_of)
+    res = reader(frame_code, cfg, path, as_of)
+    if not res.kept and not res.dropped:
+        # Zero in and zero out is not an empty frame; it is a file the reader
+        # could not read. An empty frame still produces boundary drops. Failing
+        # here stops a frame silently contributing nothing to the pool.
+        raise ConfigError(
+            f"{frame_code}: the reader found NO ROWS AT ALL in {path} — neither kept nor "
+            f"dropped at the boundary. A genuinely empty frame is not possible here: every "
+            f"frame in the register was captured with records in it. Almost always this is "
+            f"the file format (is it YAML, CSV or JSON, and does the suffix say so?) or a "
+            f"column mapping pointing at a field name the file does not have. Run `inspect` "
+            f"against this file."
+        )
+    return res
 
 
 def record_fields() -> list[str]:
