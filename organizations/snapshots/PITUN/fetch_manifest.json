@@ -1,0 +1,10 @@
+{
+  "script": "pitun_fetch.py",
+  "script_version": "2.0.0",
+  "captured_utc": "2026-09-24T00:57:53+00:00",
+  "directory_url": "https://pit-un.org/directory/",
+  "directory_pages": 3,
+  "members_listed": 72,
+  "entity_pages_saved": 72,
+  "_why_entity_pages": "PIT-UN lists universities. The directory names no unit; the entity pages carry Designee, Positions, Co-Designee, Co-Positions and Website, which is what Rule 1 resolves against. Capturing the directory alone would make every record unit_unresolved."
+}

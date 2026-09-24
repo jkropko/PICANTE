@@ -1,0 +1,224 @@
+# PITUN — capture notes
+
+Frame: PIT University Network member roster (Block A).
+Captured: 2026-09-23. Register freeze date: [RECORD HERE].
+Captured by: J. Kropko.
+Tool: `pitun_fetch.py` v2.0.0 (saved in this directory), `fetch` then `parse`.
+
+---
+
+## 1. Route
+
+Registered route: member roster, enumerated in full from an archived snapshot.
+Followed as registered. No gate, no authentication, no obstacle.
+
+Three directory pages at `https://pit-un.org/directory/`, paginated
+`?query-7-page=N`, 24 members per page, **72 distinct members**. Each directory
+entry gives only a name, a link to a PIT-UN entity page, and a regional hub.
+
+**The entity pages are part of the capture, not an extra.** PIT-UN lists
+universities, so Rule 1 applies to every record: it resolves to the unit the
+FRAME ITSELF NAMES, and the parent institution does not enter the sample. The
+directory names no unit. The entity pages carry Designee, Positions,
+Co-Designee, Co-Positions and Website, and those fields are the frame's naming
+of a unit — for Arizona State, the positions name the School for the Future of
+Innovation in Society and the Julie Ann Wrigley Global Futures Laboratory, and
+the website field gives pit.asu.edu alongside asu.edu.
+
+Capturing the directory alone would have sent all 72 records to O3 with nothing
+for Rule 1 to resolve against, and Block A would have yielded nothing.
+
+Saved: `directory/page_1..3.html`, `entities/<slug>.html`,
+`entity_index.json`, `pitun_members.csv` (the frame of record, named in
+`primary.txt`), `fetch_manifest.json`.
+
+**Archived.** All three directory pages were saved to the Wayback Machine on
+the capture date — separately, because `?query-7-page=N` are distinct URLs to
+the archive and saving page 1 alone would have archived 24 of the 72 members.
+URLs in `wayback.txt`. Unlike FORD, the site is ungated and the archive
+succeeded, so the snapshots corroborate the capture rather than standing in for
+it: anyone can re-fetch pit-un.org and check.
+
+The directory snapshots cover the roster but **not** the fields Rule 1 resolves
+against, which live on the 58 entity pages. A small selection of entity pages
+is being archived to corroborate the specific claims in §3 and §4 rather than
+all 58; the selection and its reasoning are recorded in `wayback.txt`.
+
+## 2. Capture result
+
+- **72 members**, up from the 64 New America reported in 2023.
+- **58 have an entity page; 14 do not** (see §3).
+- **55 name at least one unit** in Positions or Co-Positions.
+- **3 carry the International region** — Szeged (Hungary), CEPI FGV São Paulo,
+  and one other. C2 candidates, but C2 is a human determination at O4 from the
+  organization's own materials, not from this field.
+- Every member that has an entity page has a usable website. The 14 with no
+  website are exactly the 14 with no entity page.
+
+## 3. FINDING: PIT-UN names no unit for 19% of its members
+
+Fourteen of 72 members are listed in the directory but their entity page does
+not resolve — the server answers with the directory itself. **Verified in a
+browser, logged out, on the capture date**, so this is a property of the frame
+and not an artifact of scripted access.
+
+For those members the frame names no designee, no position, no unit and no
+website. The members:
+
+Boston University; Columbia University; Cornell University; Florida
+International University; Lane College; Nazareth University; Northeastern
+University; Prairie View A&M University; Princeton University; RAND School of
+Public Policy; Stillman College; The Pennsylvania State University; University
+of Szeged (Hungary); University of the South (Sewanee).
+
+**No shared property explains the gap.** They are not a recent intake — Columbia,
+Cornell, Princeton, Penn State, Northeastern and Boston University are
+long-standing members and appear in the directory listing with normal region
+tags. The group mixes large private research universities, HBCUs (Lane,
+Stillman, Prairie View A&M), an international member (Szeged), and one entity
+that is not a university at all (RAND School of Public Policy). The most likely
+explanation is an unmaintained content-management gap on PIT-UN's side, but
+that is inference and is recorded as such.
+
+**Independently corroborated.** On 2026-09-24 a Wayback Machine save was
+requested for `https://pit-un.org/entity/columbia-university/`. The Internet
+Archive's crawler was served the member directory and archived that instead:
+the resulting snapshot is filed under `pit-un.org/directory/`
+(`.../web/20260924064248/https://pit-un.org/directory/`). A third party with no
+connection to this project therefore encountered the same substitution, on the
+capture date. Recorded with its requested URL in `wayback.txt`; the two must be
+read together, since the snapshot alone looks like an ordinary directory save.
+
+**A control rules out the obvious alternative explanation.** Four minutes after
+the Columbia save, a Wayback save was requested for
+`https://pit-un.org/entity/arizona-state-university/` and archived normally
+under its own entity URL
+(`.../web/20260924064606/https://pit-un.org/entity/arizona-state-university/`).
+Same crawler, same session. The archive reaches entity pages when they exist,
+so the Columbia result is not a crawler limitation, a rate limit, or an
+artifact of how entity URLs are requested. The two snapshots together are the
+strongest evidence for this finding and should be cited as a pair.
+
+**Handling.** The records are retained — dropping them would understate the
+frame's membership, which is 72 — with `entity_page_missing = TRUE` and every
+entity-page field empty. `listing_text` records why it is empty. They will log
+as `unit_unresolved` at O3, be counted, and feed sensitivity check (h) as part
+of the bound on what the unit rule and the frame boundaries exclude.
+
+**Why this matters beyond the count.** The register treats PIT-UN as an
+identity-type frame: organizations join and thereby declare themselves. The
+unit-resolution rule depends on the frame naming a unit. For 19% of members it
+names nothing.
+
+This is also a second, independent reason for excluding Block A from the
+Block B to Block C unit-resolution comparison. The register's stated reason is
+that PIT-UN lists universities, so the block's rate is set by a listing
+convention rather than by the tradition's organizational form. This finding
+adds that the rate is also set by how completely PIT-UN maintains its own
+directory — likewise nothing to do with organizational form. The exclusion was
+already registered; this strengthens rather than changes it.
+
+**Consequence for Block A's yield.** Before C1–C5 and before Rule 1
+resolution, the realistic ceiling for this frame is the 55 members that name a
+unit, not 72. Ford is the block's other frame.
+
+## 4. Two source defects worth knowing about
+
+**The website is often in the anchor text, not the href.** Several entity pages
+render the Website field as an anchor whose href is an unsaved WordPress
+placeholder (`_wp_link_placeholder`) while the anchor text holds the real URL:
+
+    <a href=".../_wp_link_placeholder">https://direitosp.fgv.br/en/...</a>
+
+A first pass read the href and recorded those members as having no website.
+The parser now prefers a URL found in the anchor text and falls back to the
+href. Any remaining placeholder or pit-un.org value is kept in its own column
+(`broken_links`, `pitun_internal_links`) and `website_url` is left BLANK rather
+than wrong.
+
+Blank is deliberate. C1 asks whether the candidate has its own web presence,
+and a pit-un.org page is PIT-UN's presence, not the member's. More seriously,
+at O5 the lexicon proxy fetches `website_url` and pattern-matches the frozen
+lexicon against it; pointed at a pit-un.org page it would compute the proxy
+over PIT-UN's vocabulary and file the record in the wrong stratum for a reason
+unrelated to how the organization describes itself. A blank is resolved by
+hand; a wrong URL is silently believed.
+
+**A single URL is often already unit-specific.** Brown's website field gives
+`brown.edu/initiatives/data-science/home`, Case Western's `case.edu/issacs/`.
+These are the frame naming a unit through the website field even where
+Positions does not, and they are available to Rule 1 at O3 on the same terms as
+any other field the frame supplies.
+
+## 5. No location field
+
+The directory and entity pages carry a regional HUB (HLC, West, MSCHE,
+International) rather than a location. The hub is an accreditation or
+geographic grouping, not an address, and `international_flag` is derived from
+it as a signal only.
+
+C2 is therefore determined at O4 from each organization's own materials, as
+the criterion requires where a frame's location metadata is absent. Consistent
+with the CTFG country-missing treatment and the CFA `location_rule` decision:
+the boundary does not pre-empt a criterion assigned to a coder.
+
+## 6. Downstream notes
+
+- Every record arrives `PENDING` for Rule 1, since the frame lists
+  institutions. Resolve only to the unit the frame names; a coder aware of a
+  qualifying unit the frame does not name logs it as `unit_known_not_surfaced`
+  and does not add it.
+- RAND School of Public Policy is a graduate school inside a research
+  institute, so it is already a unit rather than a parent university. It will
+  behave differently at Rule 1 from the other records regardless of the
+  entity-page question — and it is one of the 14 with no entity page.
+- Expect the Rule 1 worksheet for this frame to be long. That is the rule
+  working, not a problem.
+
+## 7. Currency of the roster: assessed, not confirmed
+
+The register asks that the 2026–27 cohort be confirmed present before capture.
+**It cannot be confirmed from the source.** PIT-UN's directory does not label
+members by cohort or admission year, so there is no field on the page that says
+whether the current intake is included.
+
+What is observable, on the capture date:
+
+- **72 members**, against the 64 New America reported in 2023. Growth of eight
+  is consistent with continued admissions.
+- The directory page's `modified_time` reads **2025-07-22** and the footer
+  carries **©2025**.
+
+**Assessment recorded by the lead reviewer:** the roster is taken to be as
+current as the source permits, and the stale copyright year and `modified_time`
+are attributed to site maintenance rather than to a frozen roster. That is a
+judgment, not a verification, and is recorded as such so a reader can weigh it.
+
+The consequence if the judgment is wrong is bounded and is a coverage question,
+not a validity one: the frame would under-represent recent PIT-UN admissions.
+It would not misdescribe any member that is listed. Since the register places
+population-level proportions out of scope for this strand, a roster missing a
+recent cohort weakens the claim that the frame reaches the whole membership but
+does not affect anything computed from the records themselves.
+
+Two things would settle it cheaply if it later matters: a PIT-UN new-member
+announcement naming institutions and checking them against
+`pitun_members.csv`, or a comparison against the three archived directory pages
+at a later date to see whether the roster moves at all.
+
+## 8. Still to do for this frame
+
+- [x] Capture directory and entity pages (72 members, 2026-09-23)
+- [x] Confirm the 14 missing entity pages in a browser (§3)
+- [x] 2026–27 cohort — assessed, not confirmable from the source (§7)
+- [x] Wayback all three directory pages → `wayback.txt` (2026-09-23; ungated,
+      succeeded)
+- [x] Archive one of the 14 that redirect — Columbia, 2026-09-24; the save
+      returned the directory, corroborating §3 (see `wayback.txt`)
+- [x] Archive a working entity page as a control — Arizona State, 2026-09-24;
+      archived under its own URL, ruling out a crawler limitation (§3)
+- [ ] Optional: archive Brown or Case Western (unit-specific single website)
+      and CEPI FGV (placeholder href) to corroborate §4
+- [ ] Map columns in `frames.json`: `name`, `website_url`, `listing_text`.
+      Leave `location` unmapped — the frame has no location field (§5).
+- [ ] Run `capture_log.py log` once all frames are captured

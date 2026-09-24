@@ -1,0 +1,101 @@
+# PITUN — archived captures
+# One URL per line. Lines beginning with # are notes and are ignored by
+# capture_log.py, which reads the first non-comment line as the frame's
+# archive reference.
+
+# --- Member directory, all three pages -----------------------------------
+# Saved 2026-09-24 01:20-01:23 UTC = 2026-09-23 21:20-21:23 EDT, the capture
+# session recorded in notes.txt. Wayback timestamps are UTC, so these carry the
+# following day's date; noted so the one-day offset reads as a timezone
+# convention rather than as a separate capture.
+#
+# All three pages are archived separately because ?query-7-page=N are distinct
+# URLs to the archive. Saving page 1 alone would have archived 24 of the 72
+# members.
+
+# page 1 of 3 (members 1-24)
+https://web.archive.org/web/20260924012041/https://pit-un.org/directory/
+
+# page 2 of 3 (members 25-48)
+https://web.archive.org/web/20260924012110/https://pit-un.org/directory/?query-7-page=2
+
+# page 3 of 3 (members 49-72)
+https://web.archive.org/web/20260924012341/https://pit-un.org/directory/?query-7-page=3
+
+# --- What these snapshots do and do not cover ----------------------------
+#
+# COVER: the membership roster as it stood on the capture date — 72 members,
+# their names, and their entity-page links.
+#
+# DO NOT COVER: anything Rule 1 resolves against. The directory names no unit;
+# the Designee, Positions, Co-Designee, Co-Positions and Website fields live on
+# the 58 individual entity pages, which are not archived here. See notes.txt §1.
+#
+# This is acceptable for this frame in a way it would not have been for FORD.
+# pit-un.org is ungated: anyone can re-fetch the entity pages and check the
+# capture against the live site. The archive corroborates; the project's own
+# capture in entities/ is the record. For FORD the gate blocked third-party
+# archiving entirely, leaving the project capture as the sole record.
+
+# --- Entity pages: selective archiving, still to do ----------------------
+#
+# Archiving all 58 entity pages is not proportionate against the rate limit.
+# Archive a small set chosen to corroborate each specific claim made in
+# notes.txt, and record here which and why:
+#
+#   [x] Arizona State University — DONE, see below
+#   [ ] Brown or Case Western — a single website that is already unit-specific
+#       (notes §4)
+#   [ ] CEPI FGV Sao Paulo Law School — placeholder href with the real URL in
+#       the anchor text (notes §4), and an International-region record (§2, §5)
+#   [x] One of the 14 with no entity page — DONE, see below.
+#
+# Paste the timestamped URLs beneath each item as they are made.
+
+# --- Third-party evidence for the missing entity pages (notes.txt §3) ----
+#
+# REQUESTED (2026-09-24 06:42 UTC = 02:42 EDT):
+#     https://pit-un.org/entity/columbia-university/
+#
+# RESULTING SNAPSHOT:
+https://web.archive.org/web/20260924064248/https://pit-un.org/directory/
+#
+# READ THESE TWO LINES TOGETHER OR THEY PROVE NOTHING. The save was requested
+# for Columbia's ENTITY URL. What the Internet Archive's crawler received, and
+# therefore archived, was the member DIRECTORY — the snapshot is filed under
+# pit-un.org/directory/, not under the entity URL.
+#
+# That substitution is precisely the finding in notes.txt §3: Columbia is
+# listed as a member but has no entity page, and the server answers the entity
+# URL with the directory. It is now corroborated by a third party that has no
+# connection to this project, on the capture date, which is stronger than the
+# project's own fetch log and stronger than a browser check by the researcher.
+#
+# The caution: viewed on its own this snapshot looks like an ordinary directory
+# save. Nothing in the archived page records what was asked for. The requested
+# URL above is the whole of the evidence and must travel with the snapshot URL
+# wherever this is cited.
+#
+# Worth checking, and recording here if it exists: the Wayback index for the
+# entity URL itself,
+#     https://web.archive.org/web/*/pit-un.org/entity/columbia-university/
+# If the archive holds a redirect entry under that URL, it is self-contained
+# evidence and does not depend on this note.
+
+# --- A working entity page, archived for contrast ------------------------
+# Requested and archived 2026-09-24 06:46 UTC = 02:46 EDT, four minutes after
+# the Columbia save above.
+https://web.archive.org/web/20260924064606/https://pit-un.org/entity/arizona-state-university/
+#
+# This corroborates notes.txt §4 — two websites, one of them the PIT-specific
+# pit.asu.edu — but its greater value is as a CONTROL on the §3 finding.
+#
+# Same crawler, same session, four minutes apart:
+#   Columbia's entity URL  -> archived as pit-un.org/directory/
+#   ASU's entity URL       -> archived under its own entity URL
+#
+# So the Columbia result is not a Wayback quirk, a rate limit, or a crawler
+# that cannot follow entity URLs. The archive reaches entity pages perfectly
+# well when they exist. Columbia's does not exist, which is the §3 finding.
+# This pair is the strongest single piece of evidence for it and should be
+# cited together.
