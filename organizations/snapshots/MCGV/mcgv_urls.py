@@ -59,7 +59,7 @@ try:
 except ImportError:
     sys.exit("needs requests and beautifulsoup4:  pip install requests beautifulsoup4")
 
-SCRIPT_VERSION = "2.0.0"
+SCRIPT_VERSION = "2.1.0"
 HERE = Path(__file__).resolve().parent
 
 BASE = "https://www.mcgovern.org/grants/"
@@ -245,10 +245,34 @@ def cmd_join(args) -> int:
         for n in unmatched[:8]:
             why = urls.get(n, ("", "name not found in the listing pages"))[1]
             print(f"    {n[:52]:<52} {why}")
+    # The enumerator reads ONE file per frame and needs website_url on the same
+    # rows as the grants, so the merged file — not the download — is the frame
+    # of record. Writing it and primary.txt here keeps the two from drifting:
+    # naming the download in primary.txt would hash a file that is missing the
+    # column the O4 and O5 stages depend on.
+    merged_name = "mcgv_grants_with_urls.csv"
+    merged = out / merged_name
+    src_fields = list(rows[0].keys()) if rows else []
+    with merged.open("w", newline="", encoding="utf-8") as fh:
+        w = csv.DictWriter(fh, fieldnames=src_fields + ["website_url", "url_source"])
+        w.writeheader()
+        for r in rows:
+            n = (r.get(col) or "").strip()
+            url, how = urls.get(n, ("", "grantee name not found in the listing pages"))
+            w.writerow({**r, "website_url": url, "url_source": how})
+    (out / "primary.txt").write_text(merged_name + "\n", encoding="utf-8")
+
+    with_url = sum(1 for r in rows
+                   if urls.get((r.get(col) or "").strip(), ("", ""))[0])
     print(f"\nwritten: {dest}")
-    print("Join on Grantee. A blank website_url means the frame offered none — leave it "
-          "blank rather than guessing; C1 and C2 are determined at O4 from the "
-          "organization's own materials.")
+    print(f"written: {merged}  ({len(rows)} grant rows, {with_url} with a website)")
+    print(f"written: {out / 'primary.txt'} naming {merged_name}")
+    print("\nprimary.txt names the MERGED file, not the download: the enumerator reads one "
+          "file per frame and needs website_url on the same rows as the grants. This "
+          "directory holds several CSVs and manifests, so capture_log.py would otherwise "
+          "refuse to guess which is the frame of record.")
+    print("\nA blank website_url means the frame offered none — left blank rather than "
+          "guessed; C1 and C2 are determined at O4 from the organization's own materials.")
 
     (out / "mcgv_urls_manifest.json").write_text(json.dumps({
         "script": "mcgv_urls.py", "script_version": SCRIPT_VERSION,
@@ -260,6 +284,8 @@ def cmd_join(args) -> int:
         "bare_domain_given_scheme": recon,
         "without_website": len(unmatched),
         "not_found_in_listings": len(absent),
+        "merged_file": "mcgv_grants_with_urls.csv",
+        "grant_rows_merged": len(rows),
         "_note": "McGovern writes many grantee links as a BARE DOMAIN with no scheme "
                  "(href=\"cworthy.org\"), which a browser resolves relative to the page and "
                  "turns into a dead mcgovern.org/grants/... link. That is a defect on their "

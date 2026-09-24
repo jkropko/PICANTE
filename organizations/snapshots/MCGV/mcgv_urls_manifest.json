@@ -1,7 +1,7 @@
 {
   "script": "mcgv_urls.py",
-  "script_version": "2.0.0",
-  "generated_utc": "2026-09-24T08:11:21+00:00",
+  "script_version": "2.1.0",
+  "generated_utc": "2026-09-24T12:05:24+00:00",
   "listing_pages": 89,
   "grantees_in_csv": 450,
   "with_website": 334,
@@ -9,5 +9,7 @@
   "bare_domain_given_scheme": 67,
   "without_website": 116,
   "not_found_in_listings": 0,
+  "merged_file": "mcgv_grants_with_urls.csv",
+  "grant_rows_merged": 890,
   "_note": "McGovern writes many grantee links as a BARE DOMAIN with no scheme (href=\"cworthy.org\"), which a browser resolves relative to the page and turns into a dead mcgovern.org/grants/... link. That is a defect on their site; the domain itself is correct and is read from the source and given a scheme. A mcgovern.org URL is never recorded as a grantee website."
 }

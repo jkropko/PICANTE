@@ -86,6 +86,16 @@ vocabulary instead of the grantee's, filing the record in the wrong stratum for
 a reason having nothing to do with how the organization describes itself — the
 same mistake that put pit-un.org into PIT-UN's `website_url`.
 
+**The frame of record is the MERGED file, not the download.** `mcgv_urls.py
+join` writes `mcgv_grants_with_urls.csv` — the 890 grant rows with
+`website_url` and `url_source` appended — and writes `primary.txt` naming it,
+in the same step. The enumerator reads one file per frame and needs
+`website_url` on the same rows as the grants; naming the download in
+`primary.txt` would hash a file missing the column that O4 and O5 depend on.
+Writing both together is what stops them drifting apart. This directory holds
+several CSVs and two manifests, so `capture_log.py` would otherwise refuse to
+guess.
+
 **`url_source` records how each URL was obtained**, because the three cases are
 not equally strong evidence: an absolute URL is what the frame published, a
 bare domain is what the frame meant to publish, and a blank is what the frame
@@ -193,7 +203,6 @@ No author conflict is known for this frame.
 - [x] Archive 4 of 89 listing pages; CSV endpoint attempted and failed (§6)
 - [x] Recover grantee websites with `mcgv_urls.py` (§2): 334 of 450 have one;
       the join matched all 450 names exactly
-- [ ] `primary.txt` naming the grants CSV. This directory will hold the CSV,
-      `mcgv_grantee_urls.csv` and two manifests, so the frame of record must be
-      named explicitly or `capture_log.py` will refuse to guess.
+- [x] `primary.txt` naming `mcgv_grants_with_urls.csv`, written by
+      `mcgv_urls.py join` alongside the merged file itself (see below).
 - [ ] Run `capture_log.py log` once all frames are captured
