@@ -13,7 +13,7 @@ from pathlib import Path
 
 import normalize as nz
 import dedupe as dd
-from frames_io import ConfigError, Record, read_frame
+from organizations.O3_enumeration_and_deduplication.frames_io import ConfigError, Record, read_frame
 
 PASS, FAIL = [], []
 

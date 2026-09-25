@@ -26,7 +26,7 @@ import csv
 from pathlib import Path
 
 import normalize as nz
-from frames_io import Record
+from organizations.O3_enumeration_and_deduplication.frames_io import Record
 
 # Register order. Multi-frame records take the block and admission mechanism
 # of the frame listed FIRST here, per the draw rule; the rest is retained.

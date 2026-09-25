@@ -20,11 +20,28 @@ cost.
 from __future__ import annotations
 
 import csv
+import sys
 import json
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
 
 import normalize as nz
+
+# Python caps a single CSV field at 128 KB. The Civic Tech Field Guide export
+# carries long free-text fields across its 86 columns and exceeds that, which
+# surfaces as "_csv.Error: field larger than field limit (131072)" rather than
+# as anything describing the data. Raise the cap as far as the platform allows.
+def _raise_csv_field_limit() -> None:
+    limit = sys.maxsize
+    while True:
+        try:
+            csv.field_size_limit(limit)
+            return
+        except OverflowError:
+            limit //= 10
+
+
+_raise_csv_field_limit()
 
 PENDING = "PENDING"
 

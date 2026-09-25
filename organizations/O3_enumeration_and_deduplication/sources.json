@@ -1,0 +1,34 @@
+{
+  "PITUN": {
+    "path": "../snapshots/PITUN/pitun_members.csv",
+    "pinned_commit": null
+  },
+  "FORD": {
+    "path": "../snapshots/FORD/ford_grants_live_database.csv",
+    "pinned_commit": null
+  },
+  "CTFG": {
+    "path": "../snapshots/CTFG/Civic Tech Field Guide data export.csv",
+    "pinned_commit": null
+  },
+  "ACT": {
+    "path": "../snapshots/ACT/act_members.yml",
+    "pinned_commit": "c18a8b03a798c54e0cb3ac7465b945915480a42e"
+  },
+  "CFA": {
+    "path": "../snapshots/CFA/organizations.json",
+    "pinned_commit": "6c5654c7fd9b9f9f236fcf6687d91f422efec050"
+  },
+  "FF": {
+    "path": "../snapshots/FF/ffwd_portfolio.csv",
+    "pinned_commit": null
+  },
+  "MCGV": {
+    "path": "../snapshots/MCGV/mcgv_grants_with_urls.csv",
+    "pinned_commit": null
+  },
+  "GORG": {
+    "path": "../snapshots/GORG/gorg_cohorts.csv",
+    "pinned_commit": null
+  }
+}

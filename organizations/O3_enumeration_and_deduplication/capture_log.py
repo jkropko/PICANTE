@@ -33,6 +33,7 @@ EXPECTED LAYOUT
 from __future__ import annotations
 
 import argparse
+import csv
 import hashlib
 import json
 import subprocess
@@ -40,13 +41,43 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from frames_io import read_rows
-
-SCRIPT_VERSION = "1.0.0"
+SCRIPT_VERSION = "1.2.0"
 HERE = Path(__file__).resolve().parent
 
-DATA_SUFFIXES = {".csv", ".json", ".tsv", ".xlsx", ".xls"}
+# Python caps a single CSV field at 128 KB. The Civic Tech Field Guide export
+# carries long free-text fields across its 86 columns and exceeds that, which
+# surfaces as "_csv.Error: field larger than field limit (131072)" rather than
+# as anything describing the data. Raise the cap as far as the platform allows.
+def _raise_csv_field_limit() -> None:
+    limit = sys.maxsize
+    while True:
+        try:
+            csv.field_size_limit(limit)
+            return
+        except OverflowError:
+            limit //= 10
+
+
+_raise_csv_field_limit()
+
+# .yml/.yaml matter: the ACT frame of record is act_members.yml, copied from
+# the pinned Jekyll repo. Omitting the suffix made that frame read as EMPTY —
+# a captured frame reported as missing, which is the wrong kind of wrong.
+DATA_SUFFIXES = {".csv", ".json", ".tsv", ".xlsx", ".xls", ".yml", ".yaml"}
 SIDECAR_NAMES = {"primary.txt", "wayback.txt", "notes.txt", "notes.md", "commit.txt"}
+
+# Frames whose rows legitimately arrive in more than one file. For these, ALL
+# data files are the frame and enumerate reads them together; primary.txt does
+# not apply, because there is no single file of record to name.
+# Frames whose rows legitimately arrive in more than one file, so that ALL
+# data files are the frame and primary.txt does not apply.
+#
+# EMPTY as of 2026-09-24. FORD was the only entry: the register defined it as
+# the live database plus a 990-PF tail. That second source was dropped once
+# the capture showed the live database already reaches back to 2011, so FORD
+# is single-source and its primary.txt governs. Leaving it here would have
+# handed the enumerator the grants CSV plus all 44 raw API pages as one frame.
+MULTI_SOURCE: dict[str, str] = {}
 
 # Register estimates, sheet 2. Warnings only — never a refusal. A count outside
 # the estimate may mean the frame moved since the register was written, which
@@ -96,10 +127,19 @@ def git_commit(path: Path) -> str | None:
 
 
 def read_sidecar(d: Path, name: str) -> list[str]:
+    """Non-empty, non-comment lines from a sidecar file.
+
+    The wayback.txt files carry substantial commentary — which page each
+    snapshot covers, what it does and does not prove, why a save failed. An
+    earlier version counted every non-empty line, so a frame with five
+    archived pages reported ninety-three archive URLs. A count that inflates
+    with the quality of the notes is worse than no count.
+    """
     p = d / name
     if not p.exists():
         return []
-    return [l.strip() for l in p.read_text(encoding="utf-8").splitlines() if l.strip()]
+    return [l.strip() for l in p.read_text(encoding="utf-8").splitlines()
+            if l.strip() and not l.lstrip().startswith("#")]
 
 
 def data_files(d: Path) -> list[Path]:
@@ -111,8 +151,34 @@ def data_files(d: Path) -> list[Path]:
 
 
 def count_rows(p: Path) -> int | None:
+    """Row count for the size checks. None where the file cannot be read.
+
+    Deliberately self-contained: this script imports nothing from the rest of
+    the toolkit, so an import path problem cannot stop the capture log being
+    written on the freeze day. It still READS config/frames.json for the
+    register's frame list, so run it from the toolkit directory — or pass
+    --config.
+    """
     try:
-        return len(read_rows(p))
+        suf = p.suffix.lower()
+        if suf in (".yml", ".yaml"):
+            import yaml
+            data = yaml.safe_load(p.read_text(encoding="utf-8"))
+        elif suf == ".json":
+            data = json.loads(p.read_text(encoding="utf-8"))
+        elif suf in (".csv", ".tsv"):
+            delim = "\t" if suf == ".tsv" else ","
+            with p.open(newline="", encoding="utf-8-sig", errors="replace") as fh:
+                return sum(1 for _ in csv.reader(fh, delimiter=delim)) - 1
+        else:
+            return None
+
+        if isinstance(data, dict):
+            for key in ("organizations", "records", "data", "items", "members", "grants"):
+                if isinstance(data.get(key), list):
+                    return len(data[key])
+            return None
+        return len(data) if isinstance(data, list) else None
     except Exception:  # noqa: BLE001
         return None
 
@@ -150,7 +216,12 @@ def cmd_log(args) -> int:
             continue
 
         primary_names = read_sidecar(d, "primary.txt")
-        if len(files) == 1:
+        multi = fc in MULTI_SOURCE
+        if multi:
+            primary = files[0]
+            if len(files) < 2:
+                warnings.append(f"{fc}: only one data file captured. {MULTI_SOURCE[fc]}")
+        elif len(files) == 1:
             primary = files[0]
         elif primary_names:
             match = [p for p in files if p.name == primary_names[0]]
@@ -180,7 +251,8 @@ def cmd_log(args) -> int:
                             "— it is the only exactly reproducible frame in the register, and "
                             "a dated copy gives that up.")
 
-        n = count_rows(primary)
+        n = sum(x for x in (count_rows(p) for p in files) if x is not None) if multi \
+            else count_rows(primary)
         if n is not None and fc in EXPECTED:
             lo, hi, why = EXPECTED[fc]
             if lo is not None and n < lo:
@@ -190,9 +262,11 @@ def cmd_log(args) -> int:
 
         entries[fc] = {
             "status": "captured",
-            "primary_file": str(primary.relative_to(root)),
+            "primary_file": (", ".join(str(p.relative_to(root)) for p in files) if multi
+                             else str(primary.relative_to(root))),
             "primary_sha256": sha256(primary),
             "primary_rows": n,
+            "multi_source": multi,
             "all_files": [
                 {"path": str(p.relative_to(root)), "sha256": sha256(p),
                  "bytes": p.stat().st_size, "rows": count_rows(p)}
@@ -202,7 +276,8 @@ def cmd_log(args) -> int:
             "wayback": wayback,
             "notes": read_sidecar(d, "notes.txt") + read_sidecar(d, "notes.md"),
         }
-        sources[fc] = {"path": str(primary), "pinned_commit": commit}
+        sources[fc] = ({"paths": [str(p) for p in files], "pinned_commit": commit} if multi
+                       else {"path": str(primary), "pinned_commit": commit})
 
     # Cohorts recorded as pending are a registered state, not an omission.
     pending = (frames_cfg.get("GORG", {}).get("cohorts", {}) or {}).get("pending", [])

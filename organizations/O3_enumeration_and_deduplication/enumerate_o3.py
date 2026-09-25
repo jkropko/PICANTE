@@ -35,7 +35,7 @@ from pathlib import Path
 
 import normalize as nz
 import dedupe as dd
-from frames_io import (ConfigError, Record, FrameResult, read_frame, read_rows,
+from organizations.O3_enumeration_and_deduplication.frames_io import (ConfigError, Record, FrameResult, read_frame, read_rows,
                        record_fields)
 
 SCRIPT_VERSION = "1.0.0"

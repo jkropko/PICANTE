@@ -117,15 +117,22 @@
         "_registered": "Type contains 'Organization' AND (country = United States OR country missing). Expect ~1,099 candidates: 623 US-confirmed plus 476 requiring manual country determination at O4."
       },
       "columns": {
-        "name": "CONFIRM",
-        "website_url": "CONFIRM",
-        "type": "CONFIRM",
-        "country": "CONFIRM",
-        "networks": "CONFIRM",
-        "added": "CONFIRM",
-        "last_modified": "CONFIRM",
-        "listing_text": null
-      }
+        "name": "Project name",
+        "website_url": "Website URL",
+        "type": "Type",
+        "country": "Country (from Headquarters Location)",
+        "networks": "Networks",
+        "added": null,
+        "last_modified": "Last Modified",
+        "listing_text": "1-liner",
+        "_type_trap": "TWO COLUMNS LOOK LIKE THE BOUNDARY FIELD AND ONLY ONE IS. 'Type' (1,837 non-empty in the first 2,000 rows; values such as 'Organization') is the record type the boundary tests. 'Organization type' (1,683; values such as 'Non-profit / charity / foundation') is LEGAL FORM and belongs to the descriptive instrument, not the boundary. Mapping the wrong one yields an empty frame, because no record has a legal form containing the word 'organization'.",
+        "_country_note": "Two country columns exist: 'Country (from Headquarters Location)' (1,501 non-empty) and 'Country (Softr)' (1,299). The former is the lookup from the linked Headquarters Location record and is the more complete, so it is the one mapped. Values carry emoji flags \u2014 'United States of America \ud83c\uddfa\ud83c\uddf8' \u2014 which normalize_country strips; verified.",
+        "_added_note": "NO 'added' COLUMN EXISTS in this export, though the frame register refers to freezing on 'added'/'Last Modified'. Mapped to null. 'Created' does exist (2,000 non-empty, e.g. 7/30/2025) but was previously noted as a migration timestamp rather than a record date; the sample values are 2025 rather than 2026, so that note needs re-checking before 'Created' is relied on for anything. Nothing in the boundary or the analysis depends on it.",
+        "_status_fields": "Not boundary fields, but directly relevant to the organizational status variable at O4: 'status' (1,985; e.g. Active), 'Closed' (35; e.g. 2025) and 'If shut down, what happened?' (49; e.g. Shut down). These are the frame's own claims and do not substitute for the dated evidence artifact the codebook requires.",
+        "_previous_names": "'Previous name(s)' (11 non-empty) is carried for deduplication, as CFA's previous_names is: it is how a renamed organization is recognised as the same record.",
+        "_from": "Civic Tech Field Guide data export.csv"
+      },
+      "_captured": "Full export captured 2026-09-23: 12,373 rows, 86 columns. The register's figure was 12,114; the Field Guide is live and has grown. The FULL export was taken deliberately, not the ~1,099-record boundary subset: the O8 audit pools are drawn from records OUTSIDE the frame boundary and would not exist in a filtered file."
     },
     "ACT": {
       "name": "Alliance of Civic Technologists member list",
@@ -251,15 +258,19 @@
         ],
         "_pending_note": "Checked 2026-09-16: the AI for Government Innovation recipient list published 2026-09-15 and is capturable. The AI for Science page reads 'Applications are now closed' with no recipient list. Record AI for Science as pending, enumerate it when its list publishes, and record THAT date in enumerated_on rather than as_of. If it has not published by the close of coding, report the cohort as unenumerated and analyze the frame without it.",
         "_trap": "The AI for Science page carries six organizations under 'Previously funded recipients'. Those belong to the earlier inaugural AI for Science fund, which is NOT one of the four named cohorts. The reader rejects any row whose cohort value is not in `allowed`, which is what stops them entering the frame.",
-        "_closed_list": "Cohorts announced after the freeze date do not enter the frame regardless of when they are announced."
+        "_closed_list": "Cohorts announced after the freeze date do not enter the frame regardless of when they are announced.",
+        "_capture_guard": "gorg_fetch.py declares each cohort's expected size and refuses to write the frame if any cohort misses. That guard caught two over-counts on the first run (21 v 20, 23 v 15), which resolved to g.co, six Google properties under the .google TLD, and two partner links carrying no name."
       },
       "columns": {
-        "name": "CONFIRM",
-        "website_url": "CONFIRM",
-        "location": "CONFIRM",
-        "cohort": "CONFIRM",
-        "listing_text": null
-      }
+        "name": "name",
+        "website_url": "website_url",
+        "location": null,
+        "cohort": "cohort",
+        "listing_text": "listing_text",
+        "_location_note": "LEFT UNMAPPED DELIBERATELY. The 2019 cohort states each grantee's COUNTRY outright and it is captured to its own column; the 2025 cohort gives only a regional grouping whose meaning is mixed (Technical University of Munich's EMEA matches its HQ, Red de Innovaci\u00f3n Local's Americas does not). Neither is C2, which is determined at O4 from the organization's own materials. listing_text labels the region 'NOT headquarters' so a coder cannot mistake it.",
+        "_from": "gorg_cohorts.csv, produced by gorg_fetch.py parse; also carries focus_area, region, country and description."
+      },
+      "_captured": "Captured 2026-09-24 with gorg_fetch.py v1.4.0 (kept in snapshots/GORG/). 55 organizations across the three published cohorts \u2014 20 + 20 + 15 \u2014 each matching the size Google announced. AI for Science published no recipient list and is recorded as PENDING with 0 records. See snapshots/GORG/notes.txt."
     }
   },
   "ctfg_audit_pools": {
