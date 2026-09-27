@@ -14,8 +14,9 @@
       "summary": "Closed at nine operators. All six contested entries OUT; none operates a frame used in this study. See config/operators.json and protocol v5 sheet 3."
     },
     "register_freeze_date": {
-      "decided_on": null,
-      "summary": "STILL OPEN. One date for all eight frames, chosen without reference to the contents of any frame and recorded before capture. Set `as_of` below. Window August 2026 to January 2027. As of 2026-09-16: the Google.org AI for Government Innovation cohort published its recipients on 15 September 2026 and is capturable; AI for Science has not published and is recorded as pending."
+      "decided_on": "2026-09-24",
+      "value": "2026-09-24",
+      "summary": "Recorded at the CLOSE of capture, not in advance of it. Capture ran across 2026-09-23 and 2026-09-24 with as_of unset. No frame was inspected in order to choose the date; capture proceeded on the days the work was done. Per-frame timestamps and file hashes are in capture_log.json. This departs from the registered sequence \u2014 choose the date, record it, then capture \u2014 and goes in the next preregistration update."
     },
     "ford_990pf_source": {
       "decided_on": "2026-09-23",
@@ -37,8 +38,8 @@
       "summary": "OPEN. Everyone on the project is affiliated with UVA's PIT-UN, so the registered conflict procedure \u2014 both RAs code independently, disagreement reported unadjudicated \u2014 has no independent coder for that record. The record is NOT deleted: the registration states a conflicted organization is not removed from the pool. Provisional handling is to flag it as one where no team member is independent and keep it out of anything its coding could drive. Settle and record before coding; see snapshots/PITUN/notes.txt \u00a78."
     }
   },
-  "as_of": null,
-  "_as_of_note": "The single register freeze date, ISO. Set once, before enumeration, chosen without reference to any frame's contents. Written to date_identified on every record.",
+  "as_of": "2026-09-24",
+  "_as_of_note": "The register was captured over 2026-09-23 and 2026-09-24. The freeze date is recorded as 2026-09-24, at the close of capture rather than in advance of it. No frame was inspected in order to choose the date; capture proceeded on the days the work was done. Per-frame capture timestamps and file hashes are recorded in capture_log.json. The single register freeze date, ISO. Set once, before enumeration, chosen without reference to any frame's contents. Written to date_identified on every record.",
   "frames": {
     "PITUN": {
       "name": "PIT University Network member roster",
