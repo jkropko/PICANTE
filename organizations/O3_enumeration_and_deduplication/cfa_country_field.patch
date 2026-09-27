@@ -1,0 +1,267 @@
+diff --git a/organizations/O3_enumeration_and_deduplication/enumerate_o3.py b/organizations/O3_enumeration_and_deduplication/enumerate_o3.py
+index 230384b..107756a 100644
+--- a/organizations/O3_enumeration_and_deduplication/enumerate_o3.py
++++ b/organizations/O3_enumeration_and_deduplication/enumerate_o3.py
+@@ -35,6 +35,7 @@ from pathlib import Path
+ 
+ import normalize as nz
+ import dedupe as dd
++import frames_io
+ from frames_io import (ConfigError, Record, FrameResult, read_frame, read_rows,
+                        record_fields)
+ 
+@@ -219,6 +220,7 @@ def cmd_enumerate(args) -> int:
+         "script": "enumerate_o3.py",
+         "script_version": SCRIPT_VERSION,
+         "normalize_version": nz.SCRIPT_VERSION,
++        "frames_io_version": frames_io.SCRIPT_VERSION,
+         "run_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+         "register_freeze_date": as_of,
+         "inputs": inputs,
+diff --git a/organizations/O3_enumeration_and_deduplication/frames_io.py b/organizations/O3_enumeration_and_deduplication/frames_io.py
+index 15df8df..47038fa 100644
+--- a/organizations/O3_enumeration_and_deduplication/frames_io.py
++++ b/organizations/O3_enumeration_and_deduplication/frames_io.py
+@@ -27,6 +27,10 @@ from pathlib import Path
+ 
+ import normalize as nz
+ 
++# 1.1.0: CFA reader can test a structured country field (columns.country,
++# dotted path allowed) instead of the free-text city string.
++SCRIPT_VERSION = "1.1.0"
++
+ # Python caps a single CSV field at 128 KB. The Civic Tech Field Guide export
+ # carries long free-text fields across its 86 columns and exceeds that, which
+ # surfaces as "_csv.Error: field larger than field limit (131072)" rather than
+@@ -171,6 +175,25 @@ def _get(row: dict, colname: str | None) -> str:
+     return str(v).strip()
+ 
+ 
++def _get_path(row: dict, path: str | None) -> str:
++    """Like _get, but follows a dotted path into nested objects:
++    'location.country' reads row['location']['country']. A missing or null
++    step yields "" rather than an error, because a record with no country is
++    a record the boundary must handle, not a malformed file."""
++    if not path:
++        return ""
++    v = row
++    for step in path.split("."):
++        if not isinstance(v, dict):
++            return ""
++        v = v.get(step)
++        if v is None:
++            return ""
++    if isinstance(v, (list, tuple)):
++        return "; ".join(str(x) for x in v)
++    return str(v).strip()
++
++
+ def _base(rec: Record, fc: str, cfg: dict, as_of: str) -> Record:
+     rec.originating_frame = fc
+     rec.block = cfg["block"]
+@@ -335,6 +358,10 @@ def read_cfa(fc: str, cfg: dict, path, as_of: str) -> FrameResult:
+     c_loc = _col(cols, "location", required=False)
+     c_tags = _col(cols, "tags")
+     c_prev = _col(cols, "previous_names", required=False)
++    # Optional. When mapped, the boundary tests the frame's structured country
++    # field; the city string is used only where the country field is blank.
++    # When unmapped, behaviour is exactly as before (city string only).
++    c_country = _col(cols, "country", required=False)
+ 
+     rule = cfg.get("boundary", {}).get("location_rule", "drop_clearly_non_us")
+     if rule not in ("drop_clearly_non_us", "keep_us_only"):
+@@ -342,6 +369,7 @@ def read_cfa(fc: str, cfg: dict, path, as_of: str) -> FrameResult:
+ 
+     res = FrameResult(frame_code=fc)
+     n_unknown_loc = 0
++    basis_counts: dict[str, int] = {}
+     for i, row in enumerate(read_rows(path), start=1):
+         name = _get(row, c_name)
+         raw_tags = row.get(c_tags, "")
+@@ -364,16 +392,29 @@ def read_cfa(fc: str, cfg: dict, path, as_of: str) -> FrameResult:
+             continue
+ 
+         loc = _get(row, c_loc)
+-        guess = nz.us_location_guess(loc)
++        country = _get_path(row, c_country) if c_country else ""
++        if c_country and country:
++            guess = nz.country_guess(country)
++            basis = "country_field"
++            shown = f"country {country!r}"
++        elif c_country:
++            guess = nz.us_location_guess(loc)
++            basis = "city_fallback_country_blank"
++            shown = f"country blank; city {loc!r}"
++        else:
++            guess = nz.us_location_guess(loc)
++            basis = "city"
++            shown = repr(loc)
++        basis_counts[basis] = basis_counts.get(basis, 0) + 1
+         if guess == nz.NON_US:
+             res.dropped.append({"frame": fc, "row": i, "name": name,
+-                                "reason": f"location reads non-US: {loc!r}"})
++                                "reason": f"location reads non-US ({basis}): {shown}"})
+             continue
+         if guess == nz.UNKNOWN:
+             n_unknown_loc += 1
+             if rule == "keep_us_only":
+                 res.dropped.append({"frame": fc, "row": i, "name": name,
+-                                    "reason": f"location not determinable: {loc!r} (keep_us_only)"})
++                                    "reason": f"location not determinable ({basis}): {shown} (keep_us_only)"})
+                 continue
+ 
+         rec = _base(Record(source_key=f"{fc}:{i:05d}"), fc, cfg, as_of)
+@@ -384,13 +425,23 @@ def read_cfa(fc: str, cfg: dict, path, as_of: str) -> FrameResult:
+         rec.cfa_independence_tag = "; ".join(
+             t for t in tags if t.lower() in independence
+         )
++        notes = [f"boundary location basis: {basis}"]
++        if country:
++            notes.append(f"frame country field: {country}")
+         if guess == nz.UNKNOWN:
+-            rec.notes = "location string not determinable; retained for C2 at O4"
+-        res.kept.append(rec.finalize_keys())
++            notes.append("location not determinable; retained for C2 at O4")
++        rec.notes = "; ".join(notes)
++        rec.finalize_keys()
++        # finalize_keys() recomputes location_guess from the city string;
++        # restore the value the boundary actually used.
++        rec.location_guess = guess
++        res.kept.append(rec)
+ 
+     res.stats = {"rows_read": len(res.kept) + len(res.dropped), "kept": len(res.kept),
+                  "dropped": len(res.dropped), "location_unknown_retained": n_unknown_loc,
+-                 "location_rule": rule}
++                 "location_rule": rule,
++                 "location_field": c_country or c_loc,
++                 "location_basis_counts": basis_counts}
+     return res
+ 
+ 
+diff --git a/organizations/O3_enumeration_and_deduplication/normalize.py b/organizations/O3_enumeration_and_deduplication/normalize.py
+index f12562f..266ea52 100644
+--- a/organizations/O3_enumeration_and_deduplication/normalize.py
++++ b/organizations/O3_enumeration_and_deduplication/normalize.py
+@@ -19,7 +19,7 @@ from __future__ import annotations
+ import re
+ import unicodedata
+ 
+-SCRIPT_VERSION = "1.0.0"
++SCRIPT_VERSION = "1.1.0"
+ 
+ # --------------------------------------------------------------------- names
+ 
+@@ -196,6 +196,26 @@ def us_location_guess(raw: str | None) -> str:
+     return UNKNOWN
+ 
+ 
++def country_guess(raw: str | None) -> str:
++    """US / NON_US / UNKNOWN from a STRUCTURED country field (not a free-text
++    location). Added in 1.1.0 for the CFA roster's `location.country`.
++
++    Same asymmetry as us_location_guess: blank or unrecognized is UNKNOWN,
++    never NON_US. Only a country this module positively recognizes as non-US
++    returns NON_US. Unlike us_location_guess it does not split on commas or
++    read two-letter tokens, so "PR" in "Curitiba, PR" (Parana, Brazil) cannot
++    be mistaken for Puerto Rico.
++    """
++    c = normalize_country(raw)
++    if not c:
++        return UNKNOWN
++    if c == "united states":
++        return US
++    if c in _NON_US_COUNTRIES:
++        return NON_US
++    return UNKNOWN
++
++
+ def normalize_country(raw: str | None) -> str:
+     """Country field reduced for boundary tests. Empty string when blank."""
+     if raw is None:
+diff --git a/organizations/O3_enumeration_and_deduplication/test_enumerate_o3.py b/organizations/O3_enumeration_and_deduplication/test_enumerate_o3.py
+index a1d681c..3802d7d 100644
+--- a/organizations/O3_enumeration_and_deduplication/test_enumerate_o3.py
++++ b/organizations/O3_enumeration_and_deduplication/test_enumerate_o3.py
+@@ -254,6 +254,82 @@ check("CFA carries previous_names, which is how a renamed brigade is later recog
+ check("CFA records the independence tag", lambda: assert_eq(
+     next(r.cfa_independence_tag for r in _cfa().kept if r.name == "Open Akron"), "Official"))
+ 
++# --- CFA country-field mode (frames_io 1.1.0) -----------------------------
++# Fixtures mirror real records in the pinned organizations.json.
++
++CFA_ROWS_NESTED = [
++    {"name": "Code for Curitiba", "website": "https://c.br", "city": "Curitiba, PR",
++     "location": {"city": "Curitiba", "state": "", "country": "Brazil"},
++     "tags": ["Brigade"], "previous_names": []},
++    {"name": "Code for Puerto Rico", "website": "https://c.pr", "city": "San Juan, PR",
++     "location": {"city": "San Juan", "state": "Puerto Rico", "country": "USA"},
++     "tags": ["Brigade", "Official"], "previous_names": []},
++    {"name": "Open Columbia County", "website": "https://occ.org", "city": "Columbia County PA",
++     "location": {"city": "Berwick", "state": "PA", "country": "USA"},
++     "tags": ["Brigade"], "previous_names": []},
++    {"name": "Open Boise", "website": "https://ob.org", "city": "Boise, ID",
++     "location": None, "tags": ["Brigade"], "previous_names": []},
++    {"name": "Open Brazil", "website": "https://ob.br", "city": "Brasilia, DF",
++     "location": {"city": "Brasilia", "state": "", "country": "Brazil"},
++     "tags": ["Brigade"], "previous_names": []},
++    {"name": "Odd Country", "website": "https://odd.org", "city": "",
++     "location": {"country": "Atlantis"}, "tags": ["Brigade"], "previous_names": []},
++]
++
++
++def _cfa_country(rule="drop_clearly_non_us"):
++    cfg = {**CFA_CFG, "boundary": {"location_rule": rule},
++           "columns": {**CFA_CFG["columns"], "country": "location.country"}}
++    return read_frame("CFA", cfg, tmp_json(CFA_ROWS_NESTED), "2026-10-01")
++
++
++def _cfa_city_nested():
++    return read_frame("CFA", CFA_CFG, tmp_json(CFA_ROWS_NESTED), "2026-10-01")
++
++
++check("country_guess does not read 'PR' as Puerto Rico: Curitiba, Brazil is NON_US",
++      lambda: assert_eq(nz.country_guess("Brazil"), nz.NON_US))
++
++check("country_guess treats blank and unrecognized countries as UNKNOWN, never NON_US",
++      lambda: (assert_eq(nz.country_guess(""), nz.UNKNOWN),
++               assert_eq(nz.country_guess(None), nz.UNKNOWN),
++               assert_eq(nz.country_guess("Atlantis"), nz.UNKNOWN)))
++
++check("city mode (the default) still admits Code for Curitiba: the trap is real",
++      lambda: assert_in("Code for Curitiba", [r.name for r in _cfa_city_nested().kept]))
++
++check("country mode drops Code for Curitiba at the boundary, with the basis in the reason",
++      lambda: (assert_not_in("Code for Curitiba", [r.name for r in _cfa_country().kept]),
++               assert_true(any(d.get("name") == "Code for Curitiba"
++                               and "country_field" in d["reason"]
++                               for d in _cfa_country().dropped))))
++
++check("country mode keeps Puerto Rico, which the frame records as USA",
++      lambda: assert_in("Code for Puerto Rico", [r.name for r in _cfa_country().kept]))
++
++check("country mode keeps a US record whose city string the guesser cannot read",
++      lambda: assert_in("Open Columbia County", [r.name for r in _cfa_country().kept]))
++
++check("country mode falls back to the city string when the location object is null",
++      lambda: assert_eq(
++          next(r.notes for r in _cfa_country().kept if r.name == "Open Boise").split(";")[0],
++          "boundary location basis: city_fallback_country_blank"))
++
++check("country mode drops a non-US brigade whose city string alone is undeterminable",
++      lambda: assert_not_in("Open Brazil", [r.name for r in _cfa_country().kept]))
++
++check("country mode RETAINS an unrecognized country under the default rule",
++      lambda: assert_in("Odd Country", [r.name for r in _cfa_country().kept]))
++
++check("location_guess on a kept record is the value the boundary used, not a city re-guess",
++      lambda: assert_eq(
++          next(r.location_guess for r in _cfa_country().kept if r.name == "Open Columbia County"),
++          nz.US))
++
++check("country mode reports how many records were decided on each basis",
++      lambda: assert_eq(_cfa_country().stats["location_basis_counts"],
++                        {"country_field": 5, "city_fallback_country_blank": 1}))
++
+ check("CFA refuses to run with an unconfirmed tag vocabulary", lambda: assert_raises(
+     ConfigError, lambda: read_frame("CFA", {**CFA_CFG, "tags": {"include_any": []}},
+                                     tmp_json(CFA_ROWS), "2026-10-01")))

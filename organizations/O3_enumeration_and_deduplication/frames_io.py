@@ -27,6 +27,14 @@ from pathlib import Path
 
 import normalize as nz
 
+# 1.3.0: generic reader can strip a capture-time label glued to the front of
+#        a name (config `name_label_prefix`; GORG 2026 AI for Government
+#        Innovation cohort). The captured name is kept in notes.
+# 1.2.0: Record carries the Rule 1 resolution fields (see resolutions.py).
+# 1.1.0: CFA reader can test a structured country field (columns.country,
+# dotted path allowed) instead of the free-text city string.
+SCRIPT_VERSION = "1.3.0"
+
 # Python caps a single CSV field at 128 KB. The Civic Tech Field Guide export
 # carries long free-text fields across its 86 columns and exceeds that, which
 # surfaces as "_csv.Error: field larger than field limit (131072)" rather than
@@ -62,6 +70,14 @@ class Record:
     frame_listing_text: str = ""    # the frame's own entry, verbatim
     unit_resolution_flag: str = ""  # "" | PENDING (human sets the final value)
     unit_resolution_note: str = ""
+    # Set by apply-resolutions (resolutions.py). The frame's own listing is
+    # kept whenever a record is resolved to a unit, so the routing is auditable.
+    frame_listed_name: str = ""     # the frame's name, before Rule 1
+    frame_listed_url: str = ""      # the frame's URL, before Rule 1
+    parent_source_key: str = ""     # set on each unit of a split listing
+    unit_resolution_basis: str = "" # where in the frame the unit is named
+    unit_resolution_coder: str = ""
+    sponsor_routing: str = ""       # PROJECT | SPONSOR where a sponsor is named
     fiscal_sponsor_named: str = ""  # verbatim; presence routes to a human
     frame_operator: str = "FALSE"
     frame_operated: str = ""
@@ -171,6 +187,25 @@ def _get(row: dict, colname: str | None) -> str:
     return str(v).strip()
 
 
+def _get_path(row: dict, path: str | None) -> str:
+    """Like _get, but follows a dotted path into nested objects:
+    'location.country' reads row['location']['country']. A missing or null
+    step yields "" rather than an error, because a record with no country is
+    a record the boundary must handle, not a malformed file."""
+    if not path:
+        return ""
+    v = row
+    for step in path.split("."):
+        if not isinstance(v, dict):
+            return ""
+        v = v.get(step)
+        if v is None:
+            return ""
+    if isinstance(v, (list, tuple)):
+        return "; ".join(str(x) for x in v)
+    return str(v).strip()
+
+
 def _base(rec: Record, fc: str, cfg: dict, as_of: str) -> Record:
     rec.originating_frame = fc
     rec.block = cfg["block"]
@@ -194,9 +229,30 @@ def read_generic(fc: str, cfg: dict, path, as_of: str) -> FrameResult:
     if cohort_cfg and not c_cohort:
         raise ConfigError(f"{fc}: a cohort column is required for a cohort-defined frame")
 
+    # A label the capture glued to the front of the name. Scoped to named
+    # cohorts, and stripped only when the name begins with EXACTLY that row's
+    # label value plus a space, so an organization whose real name happens to
+    # start with a label word in another cohort is untouched. The frozen file
+    # is not edited; the captured name is kept on the record.
+    strip_cfg = cfg.get("name_label_prefix")
+    if strip_cfg:
+        if not strip_cfg.get("column") or not strip_cfg.get("cohorts"):
+            raise ConfigError(f"{fc}: name_label_prefix needs `column` and `cohorts`")
+        if not cohort_cfg:
+            raise ConfigError(f"{fc}: name_label_prefix is scoped by cohort; frame has no cohorts")
+    n_stripped, not_prefixed = 0, []
+
     res = FrameResult(frame_code=fc)
     for i, row in enumerate(read_rows(path), start=1):
         name = _get(row, c_name)
+        captured_name = ""
+        if strip_cfg and _get(row, c_cohort) in strip_cfg["cohorts"]:
+            label = _get(row, strip_cfg["column"])
+            if label and name.startswith(label + " ") and len(name) > len(label) + 1:
+                captured_name, name = name, name[len(label) + 1:].strip()
+                n_stripped += 1
+            else:
+                not_prefixed.append(name)
         if nz.is_blank(name):
             res.dropped.append({"frame": fc, "row": i, "reason": "no name in listing",
                                 "raw": json.dumps(row, default=str)[:500]})
@@ -222,6 +278,10 @@ def read_generic(fc: str, cfg: dict, path, as_of: str) -> FrameResult:
         rec.frame_listing_text = _get(row, c_txt)
         if cohort_cfg:
             rec.cohort = _get(row, c_cohort)
+        if captured_name:
+            rec.notes = (f"name as captured: {captured_name!r}; leading label "
+                         f"{captured_name[:len(captured_name) - len(name) - 1]!r} stripped "
+                         f"at enumeration (capture defect; frames.json name_label_prefix)")
         if cfg.get("lists_institutions"):
             rec.unit_resolution_flag = PENDING
             rec.unit_resolution_note = (
@@ -232,6 +292,11 @@ def read_generic(fc: str, cfg: dict, path, as_of: str) -> FrameResult:
 
     res.stats = {"rows_read": len(res.kept) + len(res.dropped), "kept": len(res.kept),
                  "dropped": len(res.dropped)}
+    if strip_cfg:
+        # Every in-scope row is expected to carry the label. One that does not
+        # is reported, not guessed at: the defect may not be uniform.
+        res.stats["name_labels_stripped"] = n_stripped
+        res.stats["in_scope_names_without_label"] = not_prefixed
     return res
 
 
@@ -335,6 +400,10 @@ def read_cfa(fc: str, cfg: dict, path, as_of: str) -> FrameResult:
     c_loc = _col(cols, "location", required=False)
     c_tags = _col(cols, "tags")
     c_prev = _col(cols, "previous_names", required=False)
+    # Optional. When mapped, the boundary tests the frame's structured country
+    # field; the city string is used only where the country field is blank.
+    # When unmapped, behaviour is exactly as before (city string only).
+    c_country = _col(cols, "country", required=False)
 
     rule = cfg.get("boundary", {}).get("location_rule", "drop_clearly_non_us")
     if rule not in ("drop_clearly_non_us", "keep_us_only"):
@@ -342,6 +411,7 @@ def read_cfa(fc: str, cfg: dict, path, as_of: str) -> FrameResult:
 
     res = FrameResult(frame_code=fc)
     n_unknown_loc = 0
+    basis_counts: dict[str, int] = {}
     for i, row in enumerate(read_rows(path), start=1):
         name = _get(row, c_name)
         raw_tags = row.get(c_tags, "")
@@ -364,16 +434,29 @@ def read_cfa(fc: str, cfg: dict, path, as_of: str) -> FrameResult:
             continue
 
         loc = _get(row, c_loc)
-        guess = nz.us_location_guess(loc)
+        country = _get_path(row, c_country) if c_country else ""
+        if c_country and country:
+            guess = nz.country_guess(country)
+            basis = "country_field"
+            shown = f"country {country!r}"
+        elif c_country:
+            guess = nz.us_location_guess(loc)
+            basis = "city_fallback_country_blank"
+            shown = f"country blank; city {loc!r}"
+        else:
+            guess = nz.us_location_guess(loc)
+            basis = "city"
+            shown = repr(loc)
+        basis_counts[basis] = basis_counts.get(basis, 0) + 1
         if guess == nz.NON_US:
             res.dropped.append({"frame": fc, "row": i, "name": name,
-                                "reason": f"location reads non-US: {loc!r}"})
+                                "reason": f"location reads non-US ({basis}): {shown}"})
             continue
         if guess == nz.UNKNOWN:
             n_unknown_loc += 1
             if rule == "keep_us_only":
                 res.dropped.append({"frame": fc, "row": i, "name": name,
-                                    "reason": f"location not determinable: {loc!r} (keep_us_only)"})
+                                    "reason": f"location not determinable ({basis}): {shown} (keep_us_only)"})
                 continue
 
         rec = _base(Record(source_key=f"{fc}:{i:05d}"), fc, cfg, as_of)
@@ -384,13 +467,23 @@ def read_cfa(fc: str, cfg: dict, path, as_of: str) -> FrameResult:
         rec.cfa_independence_tag = "; ".join(
             t for t in tags if t.lower() in independence
         )
+        notes = [f"boundary location basis: {basis}"]
+        if country:
+            notes.append(f"frame country field: {country}")
         if guess == nz.UNKNOWN:
-            rec.notes = "location string not determinable; retained for C2 at O4"
-        res.kept.append(rec.finalize_keys())
+            notes.append("location not determinable; retained for C2 at O4")
+        rec.notes = "; ".join(notes)
+        rec.finalize_keys()
+        # finalize_keys() recomputes location_guess from the city string;
+        # restore the value the boundary actually used.
+        rec.location_guess = guess
+        res.kept.append(rec)
 
     res.stats = {"rows_read": len(res.kept) + len(res.dropped), "kept": len(res.kept),
                  "dropped": len(res.dropped), "location_unknown_retained": n_unknown_loc,
-                 "location_rule": rule}
+                 "location_rule": rule,
+                 "location_field": c_country or c_loc,
+                 "location_basis_counts": basis_counts}
     return res
 
 

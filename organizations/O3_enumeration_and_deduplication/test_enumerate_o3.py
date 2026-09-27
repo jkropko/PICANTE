@@ -13,6 +13,7 @@ from pathlib import Path
 
 import normalize as nz
 import dedupe as dd
+import resolutions as rs
 from frames_io import ConfigError, Record, read_frame
 
 PASS, FAIL = [], []
@@ -254,6 +255,82 @@ check("CFA carries previous_names, which is how a renamed brigade is later recog
 check("CFA records the independence tag", lambda: assert_eq(
     next(r.cfa_independence_tag for r in _cfa().kept if r.name == "Open Akron"), "Official"))
 
+# --- CFA country-field mode (frames_io 1.1.0) -----------------------------
+# Fixtures mirror real records in the pinned organizations.json.
+
+CFA_ROWS_NESTED = [
+    {"name": "Code for Curitiba", "website": "https://c.br", "city": "Curitiba, PR",
+     "location": {"city": "Curitiba", "state": "", "country": "Brazil"},
+     "tags": ["Brigade"], "previous_names": []},
+    {"name": "Code for Puerto Rico", "website": "https://c.pr", "city": "San Juan, PR",
+     "location": {"city": "San Juan", "state": "Puerto Rico", "country": "USA"},
+     "tags": ["Brigade", "Official"], "previous_names": []},
+    {"name": "Open Columbia County", "website": "https://occ.org", "city": "Columbia County PA",
+     "location": {"city": "Berwick", "state": "PA", "country": "USA"},
+     "tags": ["Brigade"], "previous_names": []},
+    {"name": "Open Boise", "website": "https://ob.org", "city": "Boise, ID",
+     "location": None, "tags": ["Brigade"], "previous_names": []},
+    {"name": "Open Brazil", "website": "https://ob.br", "city": "Brasilia, DF",
+     "location": {"city": "Brasilia", "state": "", "country": "Brazil"},
+     "tags": ["Brigade"], "previous_names": []},
+    {"name": "Odd Country", "website": "https://odd.org", "city": "",
+     "location": {"country": "Atlantis"}, "tags": ["Brigade"], "previous_names": []},
+]
+
+
+def _cfa_country(rule="drop_clearly_non_us"):
+    cfg = {**CFA_CFG, "boundary": {"location_rule": rule},
+           "columns": {**CFA_CFG["columns"], "country": "location.country"}}
+    return read_frame("CFA", cfg, tmp_json(CFA_ROWS_NESTED), "2026-10-01")
+
+
+def _cfa_city_nested():
+    return read_frame("CFA", CFA_CFG, tmp_json(CFA_ROWS_NESTED), "2026-10-01")
+
+
+check("country_guess does not read 'PR' as Puerto Rico: Curitiba, Brazil is NON_US",
+      lambda: assert_eq(nz.country_guess("Brazil"), nz.NON_US))
+
+check("country_guess treats blank and unrecognized countries as UNKNOWN, never NON_US",
+      lambda: (assert_eq(nz.country_guess(""), nz.UNKNOWN),
+               assert_eq(nz.country_guess(None), nz.UNKNOWN),
+               assert_eq(nz.country_guess("Atlantis"), nz.UNKNOWN)))
+
+check("city mode (the default) still admits Code for Curitiba: the trap is real",
+      lambda: assert_in("Code for Curitiba", [r.name for r in _cfa_city_nested().kept]))
+
+check("country mode drops Code for Curitiba at the boundary, with the basis in the reason",
+      lambda: (assert_not_in("Code for Curitiba", [r.name for r in _cfa_country().kept]),
+               assert_true(any(d.get("name") == "Code for Curitiba"
+                               and "country_field" in d["reason"]
+                               for d in _cfa_country().dropped))))
+
+check("country mode keeps Puerto Rico, which the frame records as USA",
+      lambda: assert_in("Code for Puerto Rico", [r.name for r in _cfa_country().kept]))
+
+check("country mode keeps a US record whose city string the guesser cannot read",
+      lambda: assert_in("Open Columbia County", [r.name for r in _cfa_country().kept]))
+
+check("country mode falls back to the city string when the location object is null",
+      lambda: assert_eq(
+          next(r.notes for r in _cfa_country().kept if r.name == "Open Boise").split(";")[0],
+          "boundary location basis: city_fallback_country_blank"))
+
+check("country mode drops a non-US brigade whose city string alone is undeterminable",
+      lambda: assert_not_in("Open Brazil", [r.name for r in _cfa_country().kept]))
+
+check("country mode RETAINS an unrecognized country under the default rule",
+      lambda: assert_in("Odd Country", [r.name for r in _cfa_country().kept]))
+
+check("location_guess on a kept record is the value the boundary used, not a city re-guess",
+      lambda: assert_eq(
+          next(r.location_guess for r in _cfa_country().kept if r.name == "Open Columbia County"),
+          nz.US))
+
+check("country mode reports how many records were decided on each basis",
+      lambda: assert_eq(_cfa_country().stats["location_basis_counts"],
+                        {"country_field": 5, "city_fallback_country_blank": 1}))
+
 check("CFA refuses to run with an unconfirmed tag vocabulary", lambda: assert_raises(
     ConfigError, lambda: read_frame("CFA", {**CFA_CFG, "tags": {"include_any": []}},
                                     tmp_json(CFA_ROWS), "2026-10-01")))
@@ -371,6 +448,53 @@ check("a cohort-defined frame refuses to run without a cohort column", lambda: a
         tmp_csv(GORG_ROWS, list(GORG_ROWS[0].keys())), "2026-10-01")))
 
 
+GOV = "2026 Impact Challenge: AI for Government Innovation"
+GORG_STRIP_CFG = {**GORG_CFG,
+    "cohorts": {"allowed": ["2019 AI Impact Challenge", GOV]},
+    "name_label_prefix": {"column": "focus_area", "cohorts": [GOV]}}
+GORG_STRIP_ROWS = [
+    {"org": "Economy Johns Hopkins University", "url": "https://jhu.edu", "loc": "",
+     "cohort": GOV, "focus_area": "Economy"},
+    {"org": "Health Helium Health Foundation", "url": "https://hh.org", "loc": "",
+     "cohort": GOV, "focus_area": "Health"},
+    {"org": "Health Leads", "url": "https://healthleads.org", "loc": "",
+     "cohort": "2019 AI Impact Challenge", "focus_area": "Health"},
+    {"org": "Unlabelled Org", "url": "https://u.org", "loc": "",
+     "cohort": GOV, "focus_area": "Resilience"},
+]
+
+
+def _gorg_strip():
+    return read_frame("GORG", GORG_STRIP_CFG,
+                      tmp_csv(GORG_STRIP_ROWS, list(GORG_STRIP_ROWS[0].keys())), "2026-10-01")
+
+
+check("GORG strips a focus-area label the capture glued to the name", lambda: assert_in(
+    "Johns Hopkins University", [r.name for r in _gorg_strip().kept]))
+
+check("the strip removes only the leading label, not a later occurrence of the same word",
+      lambda: assert_in("Helium Health Foundation", [r.name for r in _gorg_strip().kept]))
+
+check("the strip is scoped to the named cohort: 'Health Leads' elsewhere keeps its name",
+      lambda: assert_in("Health Leads", [r.name for r in _gorg_strip().kept]))
+
+check("the captured name is kept on the record, so the correction is auditable", lambda: assert_in(
+    "Economy Johns Hopkins University",
+    next(r.notes for r in _gorg_strip().kept if r.name == "Johns Hopkins University")))
+
+check("dedup keys are built from the corrected name", lambda: assert_eq(
+    next(r.name_key for r in _gorg_strip().kept if r.name == "Johns Hopkins University"),
+    nz.normalize_name("Johns Hopkins University")))
+
+check("an in-scope name WITHOUT the label is reported, not guessed at", lambda: (
+    assert_eq(_gorg_strip().stats["name_labels_stripped"], 2),
+    assert_eq(_gorg_strip().stats["in_scope_names_without_label"], ["Unlabelled Org"])))
+
+check("the corrected name, not the captured one, is what the institution flag reads", lambda: assert_eq(
+    nz.institution_signal(next(r.name for r in _gorg_strip().kept
+                               if r.name.startswith("Johns"))), "university"))
+
+
 # -------------------------------------------------------------------- dedupe
 
 A = rec(source_key="CTFG:00001", originating_frame="CTFG", block="B",
@@ -459,6 +583,173 @@ check("org_ids are assigned after dedup and are stable across runs", lambda: (
 check("org_ids follow register order, so FORD sorts ahead of CTFG", lambda: assert_eq(
     dd.assign_org_ids([A, C])[0].org_id, "TPG-00001") or assert_eq(
     dd.assign_org_ids([A, C])[0].originating_frame, "FORD"))
+
+
+# -------------------------------------------------------- Rule 1 resolutions
+
+check("institution_signal flags universities in several languages and MIT", lambda: (
+    assert_eq(nz.institution_signal("Massachusetts Institute of Technology"), "institute of technology"),
+    assert_eq(nz.institution_signal("Universidad de Chile"), "university"),
+    assert_eq(nz.institution_signal("Universität Hamburg"), "university"),
+    assert_eq(nz.institution_signal("Northern Illinois University (Tech Bark)"), "university")))
+
+check("institution_signal flags a government body", lambda: assert_eq(
+    nz.institution_signal("City of Chicago Department of Innovation and Technology"), "department of"))
+
+check("institution_signal does not flag an ordinary organization or a near-miss word", lambda: (
+    assert_eq(nz.institution_signal("Upsolve"), ""),
+    assert_eq(nz.institution_signal("Universal Access Fund"), ""),
+    assert_eq(nz.institution_signal("Ada Lovelace Institute"), "")))
+
+
+def _pool():
+    return [
+        rec(source_key="PITUN:00001", originating_frame="PITUN", block="A",
+            name="Harvard University", website_url="https://www.harvard.edu",
+            unit_resolution_flag="PENDING"),
+        rec(source_key="PITUN:00002", originating_frame="PITUN", block="A",
+            name="Big State University", website_url="https://bsu.edu",
+            unit_resolution_flag="PENDING"),
+        rec(source_key="PITUN:00003", originating_frame="PITUN", block="A",
+            name="Nowhere University", website_url="https://nu.edu",
+            unit_resolution_flag="PENDING"),
+        rec(source_key="FORD:00001", originating_frame="FORD", block="A",
+            name="Candid", website_url="https://candid.org", unit_resolution_flag="PENDING"),
+        rec(source_key="MCGV:00001", originating_frame="MCGV", block="C",
+            name="Materiom", website_url="https://materiom.org",
+            fiscal_sponsor_named="FFWD", unit_resolution_flag="PENDING"),
+        rec(source_key="CTFG:00001", originating_frame="CTFG", block="B",
+            name="BetaNYC", website_url="https://beta.nyc"),
+        rec(source_key="OPER:001", originating_frame="OPERATOR", block="operator",
+            name="Ford Foundation", frame_operator="TRUE"),
+    ]
+
+
+def _ws(**over):
+    base = {
+        "PITUN:00001": [dict(decision="RESOLVED", resolved_unit_name="Berkman Klein Center",
+                             resolved_unit_url="https://cyber.harvard.edu",
+                             resolution_basis="designee position: Berkman Klein Center",
+                             coder="AK")],
+        "PITUN:00002": [dict(decision="RESOLVED", resolved_unit_name="Zeta Lab",
+                             resolved_unit_url="https://zeta.bsu.edu",
+                             resolution_basis="co-designee position", coder="CM"),
+                        dict(decision="RESOLVED", resolved_unit_name="Alpha Center",
+                             resolved_unit_url="https://alpha.bsu.edu",
+                             resolution_basis="designee position", coder="CM")],
+        "PITUN:00003": [dict(decision="UNIT_UNRESOLVED", coder="AK",
+                             known_not_surfaced="NU Civic Lab; NU Data Clinic")],
+        "FORD:00001": [dict(decision="AS_LISTED", coder="AK")],
+        "MCGV:00001": [dict(decision="AS_LISTED", sponsor_routing="PROJECT", coder="CM")],
+    }
+    base.update(over)
+    rows = []
+    for key, rs_ in base.items():
+        for r in rs_:
+            rows.append({"source_key": key, **r})
+    return rows
+
+
+def _apply(**over):
+    return rs.apply(_pool(), _ws(**over))
+
+
+check("RESOLVED replaces name and URL with the unit's, and keeps the frame's own listing", lambda: (
+    lambda u: (assert_eq(u.name, "Berkman Klein Center"),
+               assert_eq(u.website_url, "https://cyber.harvard.edu"),
+               assert_eq(u.frame_listed_name, "Harvard University"),
+               assert_eq(u.frame_listed_url, "https://www.harvard.edu"),
+               assert_eq(u.unit_resolution_flag, "resolved")))(
+    next(r for r in _apply()[0] if r.source_key == "PITUN:00001")))
+
+check("RESOLVED recomputes the dedup keys from the unit's own name and URL",
+      lambda: (lambda u: (assert_eq(u.domain_key, "harvard.edu"),
+                          assert_eq(u.name_key, nz.normalize_name("Berkman Klein Center"))))(
+          next(r for r in _apply()[0] if r.source_key == "PITUN:00001")))
+
+check("a split yields one record per unit, each pointing back to the listing", lambda: (
+    lambda units: (assert_eq(len(units), 2),
+                   assert_true(all(u.parent_source_key == "PITUN:00002" for u in units))))(
+    [r for r in _apply()[0] if r.source_key.startswith("PITUN:00002")]))
+
+check("split keys are ordered by unit name, so typing order cannot change them", lambda: assert_eq(
+    [r.name for r in sorted(_apply()[0], key=lambda r: r.source_key)
+     if r.source_key.startswith("PITUN:00002")],
+    ["Alpha Center", "Zeta Lab"]))
+
+check("UNIT_UNRESOLVED is set aside and counted, not passed to dedup", lambda: (
+    assert_not_in("PITUN:00003", [r.source_key for r in _apply()[0]]),
+    assert_in("PITUN:00003", [r.source_key for r in _apply()[1]])))
+
+check("known_not_surfaced units are logged one per row and never enter the pool", lambda: (
+    assert_eq([k["known_unit"] for k in _apply()[2]], ["NU Civic Lab", "NU Data Clinic"]),
+    assert_not_in("NU Civic Lab", [r.name for r in _apply()[0]])))
+
+check("AS_LISTED leaves the record as the frame gave it, flagged as reviewed", lambda: (
+    lambda r: (assert_eq(r.name, "Candid"), assert_eq(r.unit_resolution_flag, "as_listed")))(
+    next(r for r in _apply()[0] if r.source_key == "FORD:00001")))
+
+check("records never pending pass through untouched, operators included", lambda: (
+    assert_in("CTFG:00001", [r.source_key for r in _apply()[0]]),
+    assert_in("OPER:001", [r.source_key for r in _apply()[0]])))
+
+check("no PENDING flag survives apply-resolutions", lambda: assert_true(
+    all(r.unit_resolution_flag != "PENDING" for r in _apply()[0] + _apply()[1])))
+
+check("REFUSES a pending record with no worksheet row", lambda: assert_raises(
+    rs.ResolutionError, lambda: rs.apply(_pool(), [r for r in _ws() if r["source_key"] != "FORD:00001"])))
+
+check("REFUSES a blank decision rather than reading it as AS_LISTED", lambda: assert_raises(
+    rs.ResolutionError, lambda: _apply(**{"FORD:00001": [dict(decision="", coder="AK")]})))
+
+check("REFUSES an unattributed decision", lambda: assert_raises(
+    rs.ResolutionError, lambda: _apply(**{"FORD:00001": [dict(decision="AS_LISTED", coder="")]})))
+
+check("REFUSES RESOLVED without a basis: Rule 1 resolves only to a unit the frame names",
+      lambda: assert_raises(rs.ResolutionError, lambda: _apply(**{"PITUN:00001": [dict(
+          decision="RESOLVED", resolved_unit_name="Berkman Klein Center", coder="AK")]})))
+
+check("REFUSES a split that mixes RESOLVED with another decision", lambda: assert_raises(
+    rs.ResolutionError, lambda: _apply(**{"PITUN:00002": [
+        dict(decision="RESOLVED", resolved_unit_name="Alpha", resolution_basis="x", coder="CM"),
+        dict(decision="AS_LISTED", coder="CM")]})))
+
+check("REFUSES a sponsor record with no routing", lambda: assert_raises(
+    rs.ResolutionError, lambda: _apply(**{"MCGV:00001": [dict(decision="AS_LISTED", coder="CM")]})))
+
+check("REFUSES entering BOTH the sponsor and the project — the clause forbids it", lambda: assert_raises(
+    rs.ResolutionError, lambda: _apply(**{"MCGV:00001": [
+        dict(decision="RESOLVED", sponsor_routing="PROJECT", resolved_unit_name="Materiom",
+             resolution_basis="grantee column", coder="CM"),
+        dict(decision="RESOLVED", sponsor_routing="SPONSOR", resolved_unit_name="Fast Forward",
+             resolution_basis="fiscal sponsor column", coder="CM")]})))
+
+check("SPONSOR routing replaces the record with the sponsor and records the routing", lambda: (
+    lambda r: (assert_eq(r.name, "Fast Forward"), assert_eq(r.sponsor_routing, "SPONSOR"),
+               assert_eq(r.frame_listed_name, "Materiom")))(
+    next(r for r in _apply(**{"MCGV:00001": [dict(
+        decision="RESOLVED", sponsor_routing="SPONSOR", resolved_unit_name="Fast Forward",
+        resolution_basis="fiscal sponsor column", coder="CM")]})[0]
+        if r.source_key == "MCGV:00001")))
+
+check("REFUSES a row for a Rule 2 operator", lambda: assert_raises(
+    rs.ResolutionError, lambda: rs.apply(_pool(), _ws() + [
+        {"source_key": "OPER:001", "decision": "AS_LISTED", "coder": "AK"}])))
+
+check("ACCEPTS a coder-added row for a record the name flag missed (Rule 1 case by case)",
+      lambda: (lambda r: assert_eq(r.name, "BetaNYC Lab"))(next(
+          r for r in rs.apply(_pool(), _ws() + [{"source_key": "CTFG:00001", "decision": "RESOLVED",
+              "resolved_unit_name": "BetaNYC Lab", "resolution_basis": "listing", "coder": "AK"}])[0]
+          if r.source_key == "CTFG:00001")))
+
+check("a re-run with the same worksheet gives the same pool", lambda: assert_eq(
+    [(r.source_key, r.name) for r in _apply()[0]], [(r.source_key, r.name) for r in _apply()[0]]))
+
+check("read_worksheet REFUSES the pre-1.1.0 worksheet format instead of misreading it",
+      lambda: assert_raises(rs.ResolutionError, lambda: rs.read_worksheet(tmp_csv(
+          [{"source_key": "FORD:00001", "unit_resolution_flag": "PENDING", "coder": "",
+            "resolved_unit_name": "", "note": ""}],
+          ["source_key", "unit_resolution_flag", "coder", "resolved_unit_name", "note"]))))
 
 
 if __name__ == "__main__":

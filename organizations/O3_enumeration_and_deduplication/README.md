@@ -5,19 +5,21 @@ Turns the frozen frame snapshots into a deduplicated candidate pool of organizat
 | File | What it is |
 | --- | --- |
 | `capture_log.py` | O2 close-out: hashes the snapshots, logs the capture, writes `sources.json` |
-| `enumerate_o3.py` | CLI: inspect, enumerate, dedupe-candidates, apply-merges, prisma |
+| `enumerate_o3.py` | CLI: inspect, enumerate, apply-resolutions, dedupe-candidates, apply-merges, prisma |
 | `frames_io.py` | One reader per frame shape; applies each registered boundary |
+| `resolutions.py` | Validates and applies the reviewed Rule 1 worksheet (unit resolution, fiscal-sponsor routing) |
 | `dedupe.py` | Cross-frame candidate generation, merge application, org_id assignment |
 | `normalize.py` | Name, domain and location normalization |
 | `config/frames.json` | Frame codes, blocks, boundaries (registered) and column mappings (not) |
 | `config/operators.json` | Rule 2 operator list, with the six contested entries marked UNDECIDED |
-| `test_enumerate_o3.py` | 56 tests, each named for the failure it guards against |
+| `test_enumerate_o3.py` | 91 tests, each named for the failure it guards against |
 
 ```
 python test_enumerate_o3.py
 python capture_log.py log --snapshots snapshots --as-of 2026-10-01
 python enumerate_o3.py inspect --frame CFA --file snapshots/CFA/organizations.json
 python enumerate_o3.py enumerate --sources sources.json --out run
+python enumerate_o3.py apply-resolutions      # after unit_resolution_worksheet.csv is fully decided
 python enumerate_o3.py dedupe-candidates
 python enumerate_o3.py apply-merges
 python enumerate_o3.py prisma
@@ -66,6 +68,50 @@ Column names and the CFA tag vocabulary are placeholders. Every one reading `CON
 **FORD and MCGV** collapse grants to organizations within the frame and keep `grant_count`. Any row naming a fiscal sponsor is flagged PENDING with the Rule 1 clause quoted, including the instruction never to enter both the sponsor and the project.
 
 **PITUN** emits every record PENDING, since the frame lists universities, and carries the frame's own listing text — which is what Rule 1 resolves against, and the only thing it may resolve against.
+
+## Unit resolution (Rule 1), before dedup
+
+Dedup has to compare the units that will be coded, not the institutions the
+frames listed: Harvard in FORD and Harvard in PIT-UN may resolve to different
+centers, or one may be `unit_unresolved`. So the order is enforced —
+`dedupe-candidates` and `apply-merges` refuse any pool that still carries a
+PENDING resolution.
+
+**What gets queued.** Every PITUN and FORD record (`lists_institutions`), every
+record naming a fiscal sponsor, and — because Rule 1 applies case by case in
+every frame — any record whose NAME signals an institution (university,
+college, institute of technology, department of, city/county/state of, …).
+The name flag is deliberately broad: a false positive costs one `AS_LISTED`,
+a false negative puts a parent institution in the sample. A coder may also
+add a row for any other pool record the flag missed; operators are refused.
+
+**The worksheet.** One row per resulting unit. `decision` is:
+
+| decision | meaning | requires |
+| --- | --- | --- |
+| `AS_LISTED` | the listing is already an organization-level unit | coder |
+| `RESOLVED` | resolves to a unit the frame itself names; name and URL replaced, frame's listing kept in `frame_listed_name` / `frame_listed_url` | `resolved_unit_name`, `resolution_basis`, coder; `resolved_unit_url` strongly advised (the O5 proxy fetches it) |
+| `UNIT_UNRESOLVED` | institution identified, the frame names no unit | coder |
+
+Several `RESOLVED` rows for one `source_key` split the listing into several
+units (keys `…​.1`, `.2`, ordered by unit name so typing order cannot change
+them). `sponsor_routing` (`PROJECT` / `SPONSOR`) is required wherever a
+sponsor is named, and one listing can never be routed both ways.
+`known_not_surfaced` records units a coder knows of that the frame does not
+name — semicolon-separated, never added to the pool, logged for the
+unit-resolution bound.
+
+**What `apply-resolutions` writes.** `resolved_pool.csv` (organization-level
+units only; goes to dedup), `unit_unresolved.csv` (set aside, counted,
+excluded from full coding), `unit_known_not_surfaced.csv`,
+`resolution_log.csv` (every decision with its coder and basis), and
+`resolution_manifest.json` (decisions and sponsor routings per frame, splits,
+resolved units with no URL, input hashes). `unresolvable` is not decided here;
+it is coded under C1 at O4.
+
+**Conflicted records.** The script cannot know who is conflicted. The UVA row
+under PITUN must be routed to a non-conflicted coder by hand; see
+`../snapshots/PITUN/notes.txt` §8.
 
 ## Deduplication
 

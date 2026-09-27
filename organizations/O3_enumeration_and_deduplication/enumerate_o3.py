@@ -7,13 +7,19 @@ enumerate_o3.py — O3: enumerate the frozen frames into a candidate pool.
     enumerate           apply each frame's registered boundary; write the pool,
                         the boundary drops, the CTFG audit pools, the unit
                         resolution worksheet and a run manifest
+    apply-resolutions   consume the reviewed Rule 1 worksheet: replace listed
+                        institutions with the units the frames name, split
+                        multi-unit listings, set aside unit_unresolved records
     dedupe-candidates   propose cross-frame duplicate pairs for human review
     apply-merges        consume the reviewed worksheet, merge, assign org_ids
     prisma              PRISMA-style accounting from the run manifest
 
 ORDER MATTERS AND THE SCRIPT ENFORCES IT. `enumerate` refuses to run while the
 operator list has an UNDECIDED entry or the freeze date is unset. `apply-merges`
-refuses to run while any proposed pair is unreviewed. Both refusals exist
+refuses to run while any proposed pair is unreviewed. `apply-resolutions`
+refuses while any Rule 1 row is unreviewed, and both dedup commands refuse a
+pool that still carries a PENDING resolution, because dedup must compare the
+units that will be coded, not the institutions the frames listed. Both refusals exist
 because the alternative is a default that looks like a decision in the data
 afterwards.
 
@@ -35,10 +41,12 @@ from pathlib import Path
 
 import normalize as nz
 import dedupe as dd
+import frames_io
+import resolutions as rs
 from frames_io import (ConfigError, Record, FrameResult, read_frame, read_rows,
-                       record_fields)
+                       record_fields, PENDING)
 
-SCRIPT_VERSION = "1.0.0"
+SCRIPT_VERSION = "1.1.0"
 HERE = Path(__file__).resolve().parent
 
 
@@ -176,12 +184,37 @@ def cmd_enumerate(args) -> int:
                       "pinned_commit": src.get("pinned_commit")}
         per_frame[fc] = {"status": "enumerated", **res.stats}
         print(f"  {fc:<6} kept {len(res.kept):>5}   dropped at boundary {len(res.dropped):>5}")
+        if "name_labels_stripped" in res.stats:
+            print(f"         name labels stripped: {res.stats['name_labels_stripped']}"
+                  + (f"; in-scope names WITHOUT a label: {res.stats['in_scope_names_without_label']}"
+                     if res.stats["in_scope_names_without_label"] else ""))
 
         for pool_name, pool_rows in (res.extra_pools or {}).items():
             if pool_rows:
                 write_csv(outdir / f"{pool_name}.csv",
                           ["row", "name", "type", "country", "website"], pool_rows)
                 print(f"         + {pool_name}.csv ({len(pool_rows)} records) for the O8 audit")
+
+    # Rule 1, case by case. Frames flagged `lists_institutions` arrive PENDING
+    # from their readers; elsewhere an institution arrives unflagged. Flag any
+    # record whose name signals one, for a human to decide. AS_LISTED on the
+    # worksheet disposes of a false positive.
+    flagged_by_name: dict[str, int] = {}
+    for r in all_records:
+        if r.unit_resolution_flag == PENDING:
+            continue
+        sig = nz.institution_signal(r.name)
+        if sig:
+            r.unit_resolution_flag = PENDING
+            r.unit_resolution_note = (
+                f"POSSIBLE INSTITUTION (name signal: {sig}). Flagged by name, not by frame "
+                f"configuration. If the listing is already an organization-level unit, "
+                f"decide AS_LISTED. Otherwise Rule 1 applies: resolve only to a unit this "
+                f"frame itself names, or UNIT_UNRESOLVED.")
+            flagged_by_name[r.originating_frame] = flagged_by_name.get(r.originating_frame, 0) + 1
+    if flagged_by_name:
+        print("  flagged as possible institutions by name: " +
+              ", ".join(f"{k} {v}" for k, v in flagged_by_name.items()))
 
     # Rule 2: operators enter by construction.
     for n, op in enumerate(operators, start=1):
@@ -210,15 +243,13 @@ def cmd_enumerate(args) -> int:
               ["frame", "row", "name", "reason", "type", "country", "raw"], dropped)
 
     pending = [asdict(r) for r in all_records if r.unit_resolution_flag == "PENDING"]
-    write_csv(outdir / "unit_resolution_worksheet.csv",
-              ["source_key", "originating_frame", "name", "website_url",
-               "frame_listing_text", "fiscal_sponsor_named", "unit_resolution_note",
-               "unit_resolution_flag", "coder", "resolved_unit_name", "note"], pending)
+    write_csv(outdir / "unit_resolution_worksheet.csv", rs.WORKSHEET_FIELDS, pending)
 
     manifest = {
         "script": "enumerate_o3.py",
         "script_version": SCRIPT_VERSION,
         "normalize_version": nz.SCRIPT_VERSION,
+        "frames_io_version": frames_io.SCRIPT_VERSION,
         "run_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "register_freeze_date": as_of,
         "inputs": inputs,
@@ -229,6 +260,10 @@ def cmd_enumerate(args) -> int:
         "pool_before_cross_frame_dedup": len(all_records),
         "boundary_drops": len(dropped),
         "unit_resolution_pending": len(pending),
+        "unit_resolution_pending_by_frame": {
+            fc: sum(1 for r in pending if r["originating_frame"] == fc)
+            for fc in dict.fromkeys(r["originating_frame"] for r in pending)},
+        "flagged_as_possible_institution_by_name": flagged_by_name,
         "_note": "Counts here are pre-dedup and pre-screening. Nothing in this run applied "
                  "C1-C5, resolved a unit, routed a fiscal sponsor, or merged anything.",
     }
@@ -240,10 +275,83 @@ def cmd_enumerate(args) -> int:
     return 0
 
 
+# ---------------------------------------------------------- apply-resolutions
+
+def cmd_apply_resolutions(args) -> int:
+    records = read_records(Path(args.pool))
+    rows = rs.read_worksheet(args.worksheet)
+    pool, unresolved, known, log = rs.apply(records, rows)
+
+    outdir = Path(args.out).parent
+    outdir.mkdir(parents=True, exist_ok=True)
+    write_csv(Path(args.out), record_fields(), [asdict(r) for r in pool])
+    write_csv(outdir / "unit_unresolved.csv", record_fields(), [asdict(r) for r in unresolved])
+    write_csv(outdir / "unit_known_not_surfaced.csv", rs.KNOWN_FIELDS, known)
+    write_csv(outdir / "resolution_log.csv", rs.LOG_FIELDS, log)
+
+    def by_frame(items, key):
+        out: dict[str, dict[str, int]] = {}
+        for it in items:
+            fc, k = it["originating_frame"], it[key]
+            out.setdefault(fc, {}).setdefault(k, 0)
+            out[fc][k] += 1
+        return out
+
+    splits = sorted({r.parent_source_key for r in pool if r.parent_source_key})
+    no_url = [r.source_key for r in pool if r.unit_resolution_flag == "resolved" and not r.website_url]
+    manifest = {
+        "script": "enumerate_o3.py apply-resolutions",
+        "script_version": SCRIPT_VERSION,
+        "resolutions_version": rs.SCRIPT_VERSION,
+        "run_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "inputs": {"pool": {"path": args.pool, "sha256": sha256(Path(args.pool))},
+                   "worksheet": {"path": args.worksheet, "sha256": sha256(Path(args.worksheet))}},
+        "records_in": len(records),
+        "pool_out": len(pool),
+        "unit_unresolved": len(unresolved),
+        "units_created_by_splits": sum(1 for r in pool if r.parent_source_key),
+        "listings_split": len(splits),
+        "known_not_surfaced": len(known),
+        "decisions_by_frame": by_frame(log, "decision"),
+        "sponsor_routing_by_frame": by_frame([l for l in log if l["sponsor_routing"]],
+                                             "sponsor_routing"),
+        "resolved_units_without_url": no_url,
+        "_note": "unit_unresolved records are counted and excluded from full coding; they are "
+                 "not in the pool that goes to dedup. known_not_surfaced units are never added "
+                 "to the pool; they bound the frame for sensitivity check (h). Nothing here "
+                 "applied C1-C5.",
+    }
+    (outdir / "resolution_manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+
+    print(f"{len(records)} records in -> {len(pool)} in the pool, "
+          f"{len(unresolved)} unit_unresolved (set aside, counted)")
+    if splits:
+        print(f"  {len(splits)} listings split into {manifest['units_created_by_splits']} units")
+    print(f"  {len(known)} known-but-not-surfaced units logged (never added)")
+    if no_url:
+        print(f"  WARNING: {len(no_url)} resolved units have no URL; the O5 lexicon proxy "
+              f"cannot fetch them (see resolution_manifest.json)")
+    for fc, d in manifest["decisions_by_frame"].items():
+        print(f"  {fc:<6} " + ", ".join(f"{k} {v}" for k, v in sorted(d.items())))
+    print(f"  -> {args.out}; next: dedupe-candidates --pool {args.out}")
+    return 0
+
+
 # ----------------------------------------------------------------- dedupe
+
+def refuse_if_pending(records: list[Record], pool_path: str) -> None:
+    n = sum(1 for r in records if r.unit_resolution_flag == PENDING)
+    if n:
+        raise ConfigError(
+            f"{pool_path} still carries {n} PENDING unit resolutions. Dedup has to compare "
+            f"the units that will be coded, not the institutions the frames listed, so Rule 1 "
+            f"comes first: complete run/unit_resolution_worksheet.csv, run "
+            f"`apply-resolutions`, and dedupe the pool it writes (run/resolved_pool.csv).")
+
 
 def cmd_dedupe_candidates(args) -> int:
     records = read_records(Path(args.pool))
+    refuse_if_pending(records, args.pool)
     rows = dd.propose_candidates(records, threshold=args.threshold)
     dd.write_candidates(args.out, rows)
     cross = sum(1 for r in rows if r["cross_block"] == "YES")
@@ -256,6 +364,7 @@ def cmd_dedupe_candidates(args) -> int:
 
 def cmd_apply_merges(args) -> int:
     records = read_records(Path(args.pool))
+    refuse_if_pending(records, args.pool)
     with Path(args.decisions).open(newline="", encoding="utf-8-sig") as fh:
         decisions = list(csv.DictReader(fh))
     survivors, log = dd.apply_merges(records, decisions)
@@ -294,6 +403,14 @@ def cmd_prisma(args) -> int:
     print(f"operators added by construction: {m['operators_added']}")
     print(f"pool before cross-frame dedup:   {m['pool_before_cross_frame_dedup']}")
     print(f"unit resolutions pending:        {m['unit_resolution_pending']}")
+    rpath = Path(args.manifest).parent / "resolution_manifest.json"
+    if rpath.exists():
+        r = load_json(rpath)
+        print(f"\nafter Rule 1 (apply-resolutions):")
+        print(f"  pool going to dedup:            {r['pool_out']}")
+        print(f"  unit_unresolved (set aside):    {r['unit_unresolved']}")
+        print(f"  listings split / units created: {r['listings_split']} / {r['units_created_by_splits']}")
+        print(f"  known, not surfaced (logged):   {r['known_not_surfaced']}")
     print("\nEvery figure above is a count over the ENUMERATED POOL. No screening has been "
           "applied, so none of it describes a population.")
     return 0
@@ -320,14 +437,20 @@ def main() -> int:
     p.add_argument("--operators", default=str(HERE / "config" / "operators.json"))
     p.set_defaults(fn=cmd_enumerate)
 
-    p = sub.add_parser("dedupe-candidates", help="propose cross-frame duplicate pairs")
+    p = sub.add_parser("apply-resolutions", help="consume the reviewed Rule 1 worksheet")
     p.add_argument("--pool", default="run/enumerated_pool.csv")
+    p.add_argument("--worksheet", default="run/unit_resolution_worksheet.csv")
+    p.add_argument("--out", default="run/resolved_pool.csv")
+    p.set_defaults(fn=cmd_apply_resolutions)
+
+    p = sub.add_parser("dedupe-candidates", help="propose cross-frame duplicate pairs")
+    p.add_argument("--pool", default="run/resolved_pool.csv")
     p.add_argument("--out", default="run/dedupe_candidates.csv")
     p.add_argument("--threshold", type=float, default=0.45)
     p.set_defaults(fn=cmd_dedupe_candidates)
 
     p = sub.add_parser("apply-merges", help="consume reviewed decisions, assign org_ids")
-    p.add_argument("--pool", default="run/enumerated_pool.csv")
+    p.add_argument("--pool", default="run/resolved_pool.csv")
     p.add_argument("--decisions", default="run/dedupe_candidates.csv")
     p.add_argument("--out", default="run/candidate_pool.csv")
     p.add_argument("--prefix", default="TPG")
@@ -340,7 +463,7 @@ def main() -> int:
     args = ap.parse_args()
     try:
         return args.fn(args)
-    except (ConfigError, dd.MergeError) as e:
+    except (ConfigError, dd.MergeError, rs.ResolutionError) as e:
         print(f"\nREFUSED: {e}\n", file=sys.stderr)
         return 3
 

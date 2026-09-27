@@ -19,7 +19,7 @@ from __future__ import annotations
 import re
 import unicodedata
 
-SCRIPT_VERSION = "1.0.0"
+SCRIPT_VERSION = "1.2.0"
 
 # --------------------------------------------------------------------- names
 
@@ -196,6 +196,26 @@ def us_location_guess(raw: str | None) -> str:
     return UNKNOWN
 
 
+def country_guess(raw: str | None) -> str:
+    """US / NON_US / UNKNOWN from a STRUCTURED country field (not a free-text
+    location). Added in 1.1.0 for the CFA roster's `location.country`.
+
+    Same asymmetry as us_location_guess: blank or unrecognized is UNKNOWN,
+    never NON_US. Only a country this module positively recognizes as non-US
+    returns NON_US. Unlike us_location_guess it does not split on commas or
+    read two-letter tokens, so "PR" in "Curitiba, PR" (Parana, Brazil) cannot
+    be mistaken for Puerto Rico.
+    """
+    c = normalize_country(raw)
+    if not c:
+        return UNKNOWN
+    if c == "united states":
+        return US
+    if c in _NON_US_COUNTRIES:
+        return NON_US
+    return UNKNOWN
+
+
 def normalize_country(raw: str | None) -> str:
     """Country field reduced for boundary tests. Empty string when blank."""
     if raw is None:
@@ -206,6 +226,37 @@ def normalize_country(raw: str | None) -> str:
     if s in _US_COUNTRY:
         return "united states"
     return s
+
+
+# Rule 1 applies wherever a frame lists an institution rather than an
+# organization. PITUN and FORD are flagged wholesale by frames.json; in every
+# other frame an institution arrives unflagged, one record at a time (MIT and
+# Brown among McGovern grantees, universities in the Google.org cohorts, a
+# university group on the brigade roster). This is a FLAG for a human, not a
+# decision: a false positive costs one AS_LISTED on the worksheet, a false
+# negative puts a parent institution into the sample. Deliberately broad.
+_INSTITUTION_SIGNALS = [
+    (re.compile(r"\buniversi(ty|ties|tat|tät|te|té|ta|dad|dade)\b"), "university"),
+    (re.compile(r"\bcollege\b"), "college"),
+    (re.compile(r"\binstitute of technology\b"), "institute of technology"),
+    (re.compile(r"\bpolytechnic\b"), "polytechnic"),
+    (re.compile(r"\bschool of\b"), "school of"),
+    (re.compile(r"\bdepartment of\b"), "department of"),
+    (re.compile(r"\b(city|county|state|commonwealth) of\b"), "government body"),
+    (re.compile(r"\bministry\b"), "ministry"),
+]
+
+
+def institution_signal(name: str | None) -> str:
+    """The signal a name carries that it may be an institution rather than an
+    organization-level unit, or "" if none. Case- and accent-insensitive."""
+    if not name:
+        return ""
+    s = strip_accents(str(name)).lower()
+    for pat, label in _INSTITUTION_SIGNALS:
+        if pat.search(s) or pat.search(str(name).lower()):
+            return label
+    return ""
 
 
 def is_blank(v) -> bool:

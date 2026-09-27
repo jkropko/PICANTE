@@ -9,6 +9,16 @@
       "value": "drop_clearly_non_us",
       "summary": "CFA records with an undeterminable location stay in the frame; C2 decides them at O4. See frames.CFA.boundary."
     },
+    "cfa_location_field": {
+      "decided_on": "2026-09-27",
+      "value": "location.country, city string only where blank",
+      "summary": "Decided at O3, before any record was enumerated, screened or coded. The CFA boundary tests the roster's structured location.country field; the free-text city string is read only where the country field is blank. location_rule stays drop_clearly_non_us. The city string read three Brazilian brigades ('<city>, PR' = Parana) as Puerto Rico and could not read four other non-US ones. Measured on the pinned file with frames_io.py 1.1.0: 122 kept (0 undeterminable) vs 129 (5 undeterminable) under the city string; the seven differences are all non-US by the frame's own country field. The country field is the frame's claim, not C2. See snapshots/CFA/notes.txt \u00a73a."
+    },
+    "gorg_name_label": {
+      "decided_on": "2026-09-27",
+      "value": "strip the row's own focus_area label from the front of the name, 2026 AI for Government Innovation cohort only",
+      "summary": "Capture defect found at O3, before any record was screened or coded. In the 2026 AI for Government Innovation cohort, all 15 names in gorg_cohorts.csv carry the row's focus_area value glued to the front ('Economy Johns Hopkins University', 'Health Flexbone', 'Resilience CIV:LAB'); the other 40 rows are clean. The frozen file is not edited (its hash is the capture record). The generic reader strips the label at enumeration, only in that cohort and only on an exact '<focus_area> ' prefix match, and keeps the captured name in the record's notes. Any in-scope row without the label is reported in the run manifest rather than guessed at. The fetcher (gorg_fetch.py) should be fixed before any re-capture."
+    },
     "rule_2_operator_list": {
       "decided_on": "2026-09-16",
       "summary": "Closed at nine operators. All six contested entries OUT; none operates a frame used in this study. See config/operators.json and protocol v5 sheet 3."
@@ -31,7 +41,7 @@
     "ford_boundary": {
       "decided_on": "2026-09-23",
       "value": "program OR technology subject",
-      "summary": "~618 grants rather than 338. Ford tags 80 current technology grants outside the Technology and Society program, 70 in Civic Engagement and Government. C3 removes organizations for which technology is not constitutive. Both counts reported as a bound. See frames.FORD.boundary and notes.txt \u00a76."
+      "summary": "418 grants rather than 338 (258 organizations after within-frame dedup; measured at O3 enumeration 2026-09-27). Ford tags 80 technology grants outside the Technology and Society program. C3 removes organizations for which technology is not constitutive. Both counts reported as a bound. See frames.FORD.boundary and notes.txt \u00a76. CORRECTED 2026-09-27: earlier text read '~618 grants' and 'a difference of 280', an arithmetic error; 338 + (400 - 320) = 418, confirmed by enumeration."
     },
     "pitun_uva_conflict": {
       "decided_on": null,
@@ -82,12 +92,12 @@
       },
       "_route": "DEVIATION from the registered route, 2026-09-23. The register says 'manual export of the topic-filtered view'. No topic filter exists: the UI exposes only Approval date and Amount facets, search matches grantee names only, and the program appears solely as a field on each grant. The REST route accepts no program, subject or location parameter either, so filtering at capture was never possible. Captured instead from the rendered HTML documents (payload embedded in div.grants-db), unfiltered, via ford_fetch.py fetch-html with a Turnstile clearance obtained manually in a browser. The narrowing moved from capture time to the boundary below. See notes.txt \u00a71-2.",
       "boundary": {
-        "_decided": "DECISION by the lead reviewer, 2026-09-23, before any record was screened or coded. A grant is inside the FORD frame if its program is Technology and Society OR it carries a Technology subject. Approximately 618 grants, collapsing to fewer organizations once grants are deduplicated at O3.",
+        "_decided": "DECISION by the lead reviewer, 2026-09-23, before any record was screened or coded. A grant is inside the FORD frame if its program is Technology and Society OR it carries a Technology subject. 418 grants, collapsing to 258 organizations at O3 (measured 2026-09-27; originally recorded as ~618, an arithmetic error).",
         "program_slug": "technology-and-society",
         "include_technology_subject": true,
         "subject_slug": "technology",
         "rule": "program_slug == 'technology-and-society' OR 'technology' in subject_slugs",
-        "_why": "The registered purpose is Ford's technology-and-society grantmaking, not its Technology and Society budget line. Of 400 grants Ford itself tags with a Technology subject, 80 sit in other current programs \u2014 70 of them in Civic Engagement and Government, which is squarely the tradition Block A exists to cover. Those are not a labelling artifact; they are grants Ford tags as technology while funding them from a different program. A program-only boundary would discard them on an internal accounting distinction. A further 42 sit under 'Other Grantmaking', the residual label applied to pre-2018 grants that did not map onto the current structure, and carry the frame's historical depth.",
+        "_why": "The registered purpose is Ford's technology-and-society grantmaking, not its Technology and Society budget line. Of 400 grants Ford itself tags with a Technology subject, 80 sit in other current programs \u2014 70 of them in Civic Engagement and Government, which is squarely the tradition Block A exists to cover. Those are not a labelling artifact; they are grants Ford tags as technology while funding them from a different program. A program-only boundary would discard them on an internal accounting distinction. A further 42 sit under 'Other Grantmaking', the residual label applied to pre-2018 grants that did not map onto the current structure, and carry the frame's historical depth. NOTE: the per-program counts that follow in notes.txt \u00a76 count program LABELS, not grants \u2014 they sum to 507 against 400 grants because a grant can carry more than one program \u2014 so they describe where the tag appears and cannot be added up to a boundary count.",
         "_what_it_admits": "Grants whose technology tag is incidental to the organization's work. That is what C3 (constitutive technology) exists to remove \u2014 remove the technology and ask whether the core activity survives. The wider boundary hands that judgment to the registered criterion rather than pre-empting it with a program label, which is the same reasoning used for the CTFG country-missing records and the CFA location_rule. Expect heavier C3 attrition in this frame than in an identity frame.",
         "_what_it_costs": "A larger screening load, and a frame whose composition depends on Ford's own subject tagging, which the study does not control and cannot audit. Reported as a limitation, not resolved.",
         "_measured": {
@@ -96,9 +106,11 @@
           "technology_subject_in_program": 320,
           "technology_subject_outside_program": 80,
           "technology_subject_under_other_grantmaking": 42,
-          "grants_inside_chosen_boundary": "~618",
+          "grants_inside_chosen_boundary": 418,
           "grants_inside_program_only_boundary": 338,
-          "_report": "Both boundary counts are reported in the write-up as a measured bound on frame completeness \u2014 what this frame would have contained under the narrower rule \u2014 in the same manner as the CTFG boundary audits. The difference, 280 grants, is the quantity at stake in the choice."
+          "_report": "Both boundary counts are reported in the write-up as a measured bound on frame completeness \u2014 what this frame would have contained under the narrower rule \u2014 in the same manner as the CTFG boundary audits. The difference, 80 grants, is the quantity at stake in the choice (originally recorded as 280, an arithmetic error corrected 2026-09-27).",
+          "organizations_inside_chosen_boundary": 258,
+          "_arithmetic": "Union of the two conditions: 338 program grants + (400 Technology-subject grants - 320 that are also in the program) = 418. Confirmed at O3 enumeration: 4,319 read, 3,901 dropped at the boundary, 418 kept, collapsing to 258 organizations (sum of grant_count = 418)."
         }
       }
     },
@@ -174,10 +186,10 @@
         ],
         "independence_tags": [
           "Official",
-          "Partner",
-          "Fiscally Sponsored"
+          "Code for America Fiscally Sponsored Brigade",
+          "Code for America Partner Brigade"
         ],
-        "_confirm": "STILL UNCONFIRMED as of 2026-09-24 \u2014 THIS BLOCKS ENUMERATION OF THIS FRAME. The lists above are guesses taken from the register's prose description, not observations of the file. The reader refuses on an empty include_any but CANNOT tell a wrong tag from a right one, so a mistyped tag yields a silently empty or wrong frame. Run `enumerate_o3.py inspect --frame CFA --file snapshots/CFA/organizations.json`, which prints the full tag inventory with counts, then set include_any, exclude_any and independence_tags from what is actually there and record the inventory in snapshots/CFA/notes.txt \u00a74. The register notes 221 records of which roughly 181 carry a Brigade tag, and that the file also holds 18F, Code for All members, German OK Labs, Code for Poland and government entities."
+        "_confirm": "CONFIRMED 2026-09-27 against the pinned file with `enumerate_o3.py inspect --frame CFA`: 221 records, 19 distinct tags, 181 exactly 'Brigade'. Matching is exact and case-insensitive. include_any and exclude_any confirmed as they stood; independence_tags CORRECTED from the placeholder ['Official', 'Partner', 'Fiscally Sponsored'], which matched no fiscally sponsored or partner brigade (no tag 'Fiscally Sponsored' exists; 'Partner' never co-occurs with 'Brigade'). Inventory and measured counts in snapshots/CFA/notes.txt \u00a74."
       },
       "boundary": {
         "location_rule": "drop_clearly_non_us",
@@ -191,6 +203,8 @@
         "name": "name",
         "website_url": "website",
         "location": "city",
+        "country": "location.country",
+        "_country_note": "Structured country field, nested path, read by frames_io.py >= 1.1.0. The boundary tests this; `location` (the city string) is the fallback where it is blank and is still carried verbatim as raw_location. Decision: _decisions.cfa_location_field.",
         "tags": "tags",
         "previous_names": "previous_names",
         "listing_text": null
@@ -261,6 +275,13 @@
         "_trap": "The AI for Science page carries six organizations under 'Previously funded recipients'. Those belong to the earlier inaugural AI for Science fund, which is NOT one of the four named cohorts. The reader rejects any row whose cohort value is not in `allowed`, which is what stops them entering the frame.",
         "_closed_list": "Cohorts announced after the freeze date do not enter the frame regardless of when they are announced.",
         "_capture_guard": "gorg_fetch.py declares each cohort's expected size and refuses to write the frame if any cohort misses. That guard caught two over-counts on the first run (21 v 20, 23 v 15), which resolved to g.co, six Google properties under the .google TLD, and two partner links carrying no name."
+      },
+      "name_label_prefix": {
+        "column": "focus_area",
+        "cohorts": [
+          "2026 Impact Challenge: AI for Government Innovation"
+        ],
+        "_why": "Capture defect: every name in this cohort begins with its focus_area label. Stripped at enumeration on an exact prefix match; captured name kept in notes. Decision: _decisions.gorg_name_label."
       },
       "columns": {
         "name": "name",
