@@ -1,0 +1,190 @@
+# GORG — capture notes
+
+Frame: Google.org, the union of four named cohorts (Block C).
+Captured: 2026-09-24. Register freeze date: [RECORD HERE].
+Captured by: J. Kropko.
+Tool: `gorg_fetch.py` v1.4.0 (kept in this directory), `fetch` → `inspect` → `parse`.
+
+---
+
+## 1. Route: four cohorts, three sources, one pending
+
+Google.org maintains no standing portfolio, so the register defines this frame
+as the union of four cohorts, named explicitly. Cohorts announced after the
+freeze date do not enter the frame regardless of when they are announced.
+
+| Cohort | Source | Records |
+|---|---|---|
+| 2019 AI Impact Challenge | `impactchallenge.withgoogle.com/ai2018` | 20 |
+| 2025 Google.org Accelerator: Generative AI | `impactchallenge.withgoogle.com/genaiaccelerator` | 20 |
+| 2026 Impact Challenge: AI for Government Innovation | `google.org/impact-challenges/ai-government-innovation/` | 15 |
+| 2026 Impact Challenge: AI for Science | `google.org/impact-challenges/ai-science/` | **0 — pending** |
+
+**55 organizations** across the three published cohorts. Each cohort's size was
+known in advance from Google's own announcements, and `parse` refuses to write
+anything unless every cohort matches its expected count (§4).
+
+**Naming note.** Google's URL and page title for the first cohort say *2018*;
+the register calls it the *2019 AI Impact Challenge*. Same cohort — launched
+2018, grantees announced May 2019. Recorded so the discrepancy is not later
+mistaken for two different programmes.
+
+## 2. AI for Science: pending, and the trap on its page
+
+Applications closed 2026-05-01 and **no recipient list had been published** as
+of the capture date. Under the register's provision, the cohort is recorded as
+pending: enumerate it if and when its list publishes, recording *that* date
+separately from the freeze date, and report it as unenumerated if it never
+publishes.
+
+The page is captured as **dated evidence of non-publication**, and the Wayback
+snapshot (`wayback.txt`) is third-party corroboration of the same fact — the
+Internet Archive found no recipient list on 2026-09-24 either. Without that,
+the claim rests on this project's own fetch log.
+
+**The trap.** That page carries six organizations under *Previously funded
+recipients*. They belong to the **earlier inaugural AI for Science fund**, not
+to the named 2026 cohort. `parse` extracts nothing from this page by design, so
+they cannot leak in; the enumerator's cohort guard would reject them as a
+second line of defence. Recorded because the page reads as though those six are
+the cohort's recipients, and nothing on it says otherwise.
+
+## 3. The 2024 Generative AI cohort is not in the frame
+
+The Generative AI Accelerator ran twice: **21 organizations in 2024, 20 in
+2025**. The register names only the 2025 cohort.
+
+The cohort page lists the 2025 participants and mentions 2024 only in prose, so
+capturing the page is correct. The risk is elsewhere: a blog post about "the
+Generative AI Accelerator" may list the 2024 cohort, and those must not be
+added by hand.
+
+## 4. Why every cohort carries a declared size
+
+Each cohort's count is declared in `gorg_fetch.py`, and `parse` refuses the
+whole frame if any cohort misses. This is not belt-and-braces; it is the only
+reason four separate parsing failures in this project were caught rather than
+shipped.
+
+For this frame the guard caught two over-counts on the first run — 21 against
+20, and 23 against 15 — which resolved to `g.co`, six Google properties under
+the `.google` top-level domain, and two partner links carrying no name
+(apolitical.co, centreforpublicimpact.org). A link with no accompanying text is
+a partner logo, not a recipient.
+
+## 5. A parsing lesson recorded, because it recurred
+
+The first parse of the 2019 cohort returned 20 records with names like
+*"American University of Beirut Millions of people in the Middle East…"* and
+*"Rainforest"* instead of *Rainforest Connection*. The count was right; the
+data was not.
+
+Cause: the parser looked for `h2`–`h5` headings, found none, and fell back to
+splitting a flattened string on a list of opening verbs. The page in fact
+renders each grantee in Google's "glue" card components, which state every
+field outright:
+
+    <p class="glue-label">UNITED KINGDOM</p>
+    <p class="glue-headline">Full Fact</p>
+    <p class="glue-body">As concerns about mis- and disinformation grow…</p>
+
+**This was the fourth failure of the same kind in this strand** — after FORD's
+pagination, PIT-UN's entity anchors and McGovern's grantee cards. Every one had
+the same cause: structure inferred from rendered text instead of read from the
+page's own elements, and every fix was the same shape. The page always said
+what it meant.
+
+**Why truncated names would have mattered more than they look.** Deduplication
+at O3 matches on name. Penn State and Columbia both appear in PIT-UN, and those
+are cross-block multi-frame records — among the few that enter sensitivity
+check (f), which requires frames from two or more blocks. A name with a
+description glued onto it would never have matched, the subset would have come
+up short, and nothing would have errored.
+
+## 6. Country and region: what they are, and what they are not
+
+The 2019 cohort states each grantee's **country** outright in `glue-label` —
+LEBANON, UNITED STATES, UGANDA, COLOMBIA. That is the best C2 material in this
+frame and is captured to its own column. It is matched against a country list
+rather than a leading-capitals rule, because organization names are capitalised
+too: TOJIL and CIV:LAB would otherwise read as countries.
+
+The 2025 cohort instead gives a **regional grouping** — Americas, Asia Pacific,
+Europe/Middle East & Africa, Global — which is mixed in meaning: Technical
+University of Munich's EMEA matches its headquarters, while Red de Innovación
+Local sits under Americas and works across Latin America.
+
+**Neither is C2.** C2 asks about headquarters or principal operations and is
+determined at O4 from each organization's own materials. `listing_text` labels
+the region field "as the cohort page reports it, NOT headquarters" so a coder
+reading a record at O3 cannot mistake it for C2 evidence. No location filter was
+applied at capture, consistent with CTFG, CFA, PIT-UN, FF and MCGV.
+
+**Expect the heaviest C2 attrition in the register.** These are global open
+calls: the 2019 cohort alone spans Lebanon, Uganda, Colombia, Indonesia, India,
+Switzerland, Brazil, France, Australia and the Netherlands, and the 2026
+government cohort adds Japan, Germany, Nigeria, Italy and the United Kingdom.
+
+## 7. Institutions, and a cross-block record to watch
+
+Several recipients are universities rather than organizations: American
+University of Beirut, Makerere, Colegio Mayor de Nuestra Señora del Rosario,
+Penn State, Columbia, Johns Hopkins, MIT, Warwick, Cincinnati, Nagoya, Aga Khan,
+Technical University of Munich. `lists_institutions` is false for this frame —
+most recipients are organizations — so records do not arrive PENDING in bulk,
+and Rule 1 is applied individually at O3 where a recipient is an institution.
+
+Note that several links already point at the funded unit rather than the
+parent: `cee.psu.edu`, `transitlab.mit.edu`, `cs.mak.ac.ug`, `saferoadsai.org`.
+Where the frame names a unit, Rule 1 resolves to that unit.
+
+**The Pennsylvania State University and Columbia University both appear in
+PIT-UN** — and both are among PIT-UN's 14 members with no entity page (see
+`../PITUN/notes.txt` §3). They are therefore Block A / Block C multi-frame
+records and enter the multi-frame subset of sensitivity check (f), which is
+otherwise expected to be small. Worth flagging in advance so their
+deduplication is verified rather than assumed.
+
+## 8. Rule 2: Google.org itself
+
+Google.org operates this frame and enters the candidate pool by construction as
+a Rule 2 operator, screened on C1–C5 and coded on the full instrument like any
+other record, flagged as an operator, and excluded from every within-block rate
+and from the saturation count because its inclusion is guaranteed rather than
+sampled.
+
+No author conflict is known for this frame.
+
+## 9. Observed Block C overlap
+
+Third confirmation of the overlap anticipated in `../FF/notes.txt` §6:
+**Lenny Learning, One Degree, Visilant and Darsel** are Fast Forward alumni
+appearing in the 2025 Generative AI cohort, and **Upsolve** and **SkillUp
+Coalition** appear in the McGovern grants. **Code for America Labs** appears in
+the 2026 government cohort — and Code for America is also the operator of the
+CFA frame in Block B, so that record needs care at deduplication.
+
+All within Block C except the Code for America case, so these do not enter the
+multi-frame subset. Provenance retained. Frame redundancy within a block is
+reported as description and not compared across blocks as evidence of relative
+population size.
+
+## 10. Still to do for this frame
+
+- [x] Capture all four cohort pages (2026-09-24)
+- [x] Archive all four (`wayback.txt`), including AI for Science as evidence of
+      non-publication
+- [x] `primary.txt` naming `gorg_cohorts.csv`
+- [ ] **Confirm the three published snapshots actually rendered.** The
+      impactchallenge pages are JavaScript-driven and Wayback may have archived
+      the shell without the recipient cards. Boxes are open in `wayback.txt`.
+      An archived shell is not an archived cohort.
+- [ ] Map columns in `frames.json`: `name`, `website_url`, `cohort`,
+      `listing_text`. Leave `location` unmapped (§6).
+- [ ] Watch for AI for Science publishing before the close of coding; if it
+      does, enumerate it and record the enumeration date separately from the
+      freeze date
+- [ ] Run `capture_log.py log` once all frames are captured
+
+
+All 15 names in the 2026 AI for Government Innovation cohort were captured with the row's focus-area label prefixed; corrected at enumeration, not in the file (frames.json _decisions.gorg_name_label).
