@@ -6,14 +6,14 @@ Sep 30, 2026
 
 You are deciding, for 455 records, whether each one is already an organization or an institution that needs narrowing to a unit inside it. This is Rule 1 of the protocol: a university, government agency or corporate parent never enters the sample itself; the unit the frame names does.
 
-The file is `organizations/O3_enumeration_and_deduplication/run/unit_resolution_worksheet.csv`. It lives on Jon's machine, not on GitHub. There is one row per record.
+The file is https://docs.google.com/spreadsheets/d/1Fo24em6merdqRVLrg9GwgWN1lWEmRa1HhAnrKj2gkOU/edit?usp=sharing
 
-For every row, answer two questions in order:
+For every row, the most important column to fill out is `decision`. For that, answer two questions in order:
 
-1. Is this listing already an organization-level unit (a nonprofit, a company, a center, a lab, a project)? If yes, the answer is `AS_LISTED`.
-2. If it is an institution, does **the frame's own text** name a unit inside it? If yes, `RESOLVED` to that unit. If no, `UNIT_UNRESOLVED`.
+1. Is this listing already an organization-level unit, the group actually doing PIT/Civic Tech/Tech for good (a nonprofit, a company, a center, a lab, a project)? If yes, the answer is `AS_LISTED`.
+2. If it is an institution (that the group we want is part of), does **the frame's own text** name that group? If yes, enter `RESOLVED` and name that group in the `resolved_unit_name` column. If no, enter `UNIT_UNRESOLVED`.
 
-Rows arrive for one of three reasons, shown in `unit_resolution_note`: the whole frame lists institutions (all of PIT-UN and Ford), the frame names a fiscal sponsor (some McGovern rows), or the name looks like an institution (56 rows from CTFG, CFA, McGovern and Google.org).
+These 455 organizations are chosen for one of three reasons, shown in `unit_resolution_note`: the whole frame lists institutions (all of PIT-UN and Ford), the frame names a fiscal sponsor (some McGovern rows), or the name looks like an institution (56 rows from CTFG, CFA, McGovern and Google.org).
 
 ## The columns
 
@@ -33,7 +33,6 @@ The first seven columns are context written by the script. **Never edit them.** 
 | `resolution_basis` | Fill in for `RESOLVED` | Where in the frame the unit is named, e.g. "Designee's position: Director, Center for X" |
 | `sponsor_routing` | Fill in if a sponsor is named | `PROJECT` or `SPONSOR` |
 | `known_not_surfaced` | Optional | Units you know of that the frame does not name; separate several with `;` |
-| `coder` | Fill in, every row | Your initials |
 | `note` | Optional | Anything worth saying, including "for Jon" |
 
 **The three decisions:**
