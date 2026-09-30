@@ -10,12 +10,12 @@
       "summary": "CFA records with an undeterminable location stay in the frame; C2 decides them at O4. See frames.CFA.boundary."
     },
     "cfa_location_field": {
-      "decided_on": "2026-09-27",
+      "decided_on": "2026-09-30",
       "value": "location.country, city string only where blank",
       "summary": "Decided at O3, before any record was enumerated, screened or coded. The CFA boundary tests the roster's structured location.country field; the free-text city string is read only where the country field is blank. location_rule stays drop_clearly_non_us. The city string read three Brazilian brigades ('<city>, PR' = Parana) as Puerto Rico and could not read four other non-US ones. Measured on the pinned file with frames_io.py 1.1.0: 122 kept (0 undeterminable) vs 129 (5 undeterminable) under the city string; the seven differences are all non-US by the frame's own country field. The country field is the frame's claim, not C2. See snapshots/CFA/notes.txt \u00a73a."
     },
     "gorg_name_label": {
-      "decided_on": "2026-09-27",
+      "decided_on": "2026-09-30",
       "value": "strip the row's own focus_area label from the front of the name, 2026 AI for Government Innovation cohort only",
       "summary": "Capture defect found at O3, before any record was screened or coded. In the 2026 AI for Government Innovation cohort, all 15 names in gorg_cohorts.csv carry the row's focus_area value glued to the front ('Economy Johns Hopkins University', 'Health Flexbone', 'Resilience CIV:LAB'); the other 40 rows are clean. The frozen file is not edited (its hash is the capture record). The generic reader strips the label at enumeration, only in that cohort and only on an exact '<focus_area> ' prefix match, and keeps the captured name in the record's notes. Any in-scope row without the label is reported in the run manifest rather than guessed at. The fetcher (gorg_fetch.py) should be fixed before any re-capture."
     },
@@ -41,11 +41,22 @@
     "ford_boundary": {
       "decided_on": "2026-09-23",
       "value": "program OR technology subject",
-      "summary": "418 grants rather than 338 (258 organizations after within-frame dedup; measured at O3 enumeration 2026-09-27). Ford tags 80 technology grants outside the Technology and Society program. C3 removes organizations for which technology is not constitutive. Both counts reported as a bound. See frames.FORD.boundary and notes.txt \u00a76. CORRECTED 2026-09-27: earlier text read '~618 grants' and 'a difference of 280', an arithmetic error; 338 + (400 - 320) = 418, confirmed by enumeration."
+      "summary": "418 grants rather than 338 (258 organizations after within-frame dedup; measured at O3 enumeration 2026-09-30). Ford tags 80 technology grants outside the Technology and Society program. C3 removes organizations for which technology is not constitutive. Both counts reported as a bound. See frames.FORD.boundary and notes.txt \u00a76. CORRECTED 2026-09-30: earlier text read '~618 grants' and 'a difference of 280', an arithmetic error; 338 + (400 - 320) = 418, confirmed by enumeration."
     },
     "pitun_uva_conflict": {
-      "decided_on": null,
-      "summary": "OPEN. Everyone on the project is affiliated with UVA's PIT-UN, so the registered conflict procedure \u2014 both RAs code independently, disagreement reported unadjudicated \u2014 has no independent coder for that record. The record is NOT deleted: the registration states a conflicted organization is not removed from the pool. Provisional handling is to flag it as one where no team member is independent and keep it out of anything its coding could drive. Settle and record before coding; see snapshots/PITUN/notes.txt \u00a78."
+      "decided_on": "2026-09-30",
+      "value": "retain; no-independent-coder fallback; inclusion rule at unit resolution; sensitivity check (j)",
+      "records": {
+        "no_independent_coder": [
+          "the UVA member record in PITUN, whatever unit Rule 1 resolves it to",
+          "PIT University Network (Rule 2 operator)"
+        ],
+        "registered_procedure": [
+          "Code for Charlottesville (CFA, and any other frame that surfaces it)",
+          "Alliance of Civic Technologists (Rule 2 operator)"
+        ]
+      },
+      "summary": "Decided at O3, before the unit-resolution worksheet was started and before any record was screened or coded. The whole team, research assistants included, is affiliated with UVA and active in its PIT-UN chapter. The registered Conflicts of Interest procedure assumes the two research assistants are unconflicted coders; for the UVA member record and the PIT-UN operator record that premise fails, and the procedure cannot be carried out as written. (1) Neither record is removed: the registration states a conflicted organization is not removed from the pool. (2) Unit resolution for UVA: both research assistants resolve the row independently from the PIT-UN listing text alone, each recording the basis. If either finds a unit the frame names, the row is RESOLVED to it (inclusion rule), so the team cannot resolve itself out of the sample; only if both find none is it UNIT_UNRESOLVED, and it is then named individually in the check (h) report. Both independent resolutions are recorded in the worksheet note. (3) Coding: the organizational strand applies the literature strand's registered fallback for records with no unconflicted team member: the record is retained and its coding flagged. Both research assistants code it independently; the lead reviewer is recused at every stage; disagreements are reported, not adjudicated; the record is flagged author_conflicted = all_team (distinct from author_conflicted = author for the two records where only the lead reviewer is conflicted). The AI model's blind Role 3 coding is reported alongside as the only coding by a non-UVA party; as registered, it never contributes to a coded value. (4) New sensitivity check (j): every organizational result is also reported excluding all four author-conflicted records. (5) Disclosed in the next preregistration update, with the omission of UVA/PIT-UN from the registered conflict statement. See snapshots/PITUN/notes.txt \u00a78."
     }
   },
   "as_of": "2026-09-24",
@@ -92,7 +103,7 @@
       },
       "_route": "DEVIATION from the registered route, 2026-09-23. The register says 'manual export of the topic-filtered view'. No topic filter exists: the UI exposes only Approval date and Amount facets, search matches grantee names only, and the program appears solely as a field on each grant. The REST route accepts no program, subject or location parameter either, so filtering at capture was never possible. Captured instead from the rendered HTML documents (payload embedded in div.grants-db), unfiltered, via ford_fetch.py fetch-html with a Turnstile clearance obtained manually in a browser. The narrowing moved from capture time to the boundary below. See notes.txt \u00a71-2.",
       "boundary": {
-        "_decided": "DECISION by the lead reviewer, 2026-09-23, before any record was screened or coded. A grant is inside the FORD frame if its program is Technology and Society OR it carries a Technology subject. 418 grants, collapsing to 258 organizations at O3 (measured 2026-09-27; originally recorded as ~618, an arithmetic error).",
+        "_decided": "DECISION by the lead reviewer, 2026-09-23, before any record was screened or coded. A grant is inside the FORD frame if its program is Technology and Society OR it carries a Technology subject. 418 grants, collapsing to 258 organizations at O3 (measured 2026-09-30; originally recorded as ~618, an arithmetic error).",
         "program_slug": "technology-and-society",
         "include_technology_subject": true,
         "subject_slug": "technology",
@@ -108,7 +119,7 @@
           "technology_subject_under_other_grantmaking": 42,
           "grants_inside_chosen_boundary": 418,
           "grants_inside_program_only_boundary": 338,
-          "_report": "Both boundary counts are reported in the write-up as a measured bound on frame completeness \u2014 what this frame would have contained under the narrower rule \u2014 in the same manner as the CTFG boundary audits. The difference, 80 grants, is the quantity at stake in the choice (originally recorded as 280, an arithmetic error corrected 2026-09-27).",
+          "_report": "Both boundary counts are reported in the write-up as a measured bound on frame completeness \u2014 what this frame would have contained under the narrower rule \u2014 in the same manner as the CTFG boundary audits. The difference, 80 grants, is the quantity at stake in the choice (originally recorded as 280, an arithmetic error corrected 2026-09-30).",
           "organizations_inside_chosen_boundary": 258,
           "_arithmetic": "Union of the two conditions: 338 program grants + (400 Technology-subject grants - 320 that are also in the program) = 418. Confirmed at O3 enumeration: 4,319 read, 3,901 dropped at the boundary, 418 kept, collapsing to 258 organizations (sum of grant_count = 418)."
         }
@@ -189,7 +200,7 @@
           "Code for America Fiscally Sponsored Brigade",
           "Code for America Partner Brigade"
         ],
-        "_confirm": "CONFIRMED 2026-09-27 against the pinned file with `enumerate_o3.py inspect --frame CFA`: 221 records, 19 distinct tags, 181 exactly 'Brigade'. Matching is exact and case-insensitive. include_any and exclude_any confirmed as they stood; independence_tags CORRECTED from the placeholder ['Official', 'Partner', 'Fiscally Sponsored'], which matched no fiscally sponsored or partner brigade (no tag 'Fiscally Sponsored' exists; 'Partner' never co-occurs with 'Brigade'). Inventory and measured counts in snapshots/CFA/notes.txt \u00a74."
+        "_confirm": "CONFIRMED 2026-09-30 against the pinned file with `enumerate_o3.py inspect --frame CFA`: 221 records, 19 distinct tags, 181 exactly 'Brigade'. Matching is exact and case-insensitive. include_any and exclude_any confirmed as they stood; independence_tags CORRECTED from the placeholder ['Official', 'Partner', 'Fiscally Sponsored'], which matched no fiscally sponsored or partner brigade (no tag 'Fiscally Sponsored' exists; 'Partner' never co-occurs with 'Brigade'). Inventory and measured counts in snapshots/CFA/notes.txt \u00a74."
       },
       "boundary": {
         "location_rule": "drop_clearly_non_us",
