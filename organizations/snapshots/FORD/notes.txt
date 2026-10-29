@@ -1,7 +1,13 @@
 # FORD — capture notes
 
 Frame: Ford Foundation Technology and Society grantee portfolio (Block A).
-Captured: 2026-09-23. Register freeze date: [RECORD HERE].
+Captured: 2026-09-23.
+Register freeze date: 2026-09-24, recorded at the close of capture
+rather than in advance of it (frames.json `_decisions.register_freeze_date`).
+This frame was captured the day BEFORE that date; its capture time and file
+hashes are in `O3_enumeration_and_deduplication/capture_log.json`, and the
+sequence departs from the registered one (choose the date, record it, then
+capture). Goes in the next preregistration update.
 Captured by: J. Kropko.
 
 ---
@@ -151,6 +157,10 @@ its grant schedule names grantees absent from `ford_grants_live_database.csv`.
   takes a single value, so that the filings can be added later without a schema
   change and so the field's presence records that a second source was
   contemplated.
+  The date suffix `2026-10-01` is a label set before capture, not the capture
+  date (2026-09-23) or the register freeze date (2026-09-24). The frozen file
+  is not edited, because its hash is the record of the capture; the capture
+  date of record is in `capture_log.json`.
 - `frames.json`: the FORD `_two_source` note is rewritten to record the drop.
 - Frame register (workbook sheet 2): the FORD enumeration route is amended to
   the live database alone.
@@ -161,8 +171,8 @@ its grant schedule names grantees absent from `ford_grants_live_database.csv`.
 
 **Decision: 2026-09-23, lead reviewer, before any record was screened or coded.
 A grant is inside the FORD frame if its program is Technology and Society OR it
-carries a Technology subject.** Approximately 618 grants, collapsing to fewer
-organizations once grants are deduplicated at O3.
+carries a Technology subject.** 418 grants, collapsing to 258 organizations
+at O3 (measured 2026-09-30; see the correction at the end of this section).
 
 Rule as implemented in `frames.json`:
 
@@ -184,6 +194,10 @@ Of 400 grants Ford itself tags with a **Technology** subject:
 | Disability Rights | 3 |
 | Mission Investments | 2 |
 | Global Governance | 1 |
+
+These are counts of program LABELS, not of grants. They sum to 507 against
+400 grants because a grant can carry more than one program label, so they show
+where the Technology tag appears and cannot be added up to a boundary count.
 
 The Technology and Society program holds **338 grants, 2017–2025**. Other
 Grantmaking is a residual label: Ford's program structure dates from 2018, and
@@ -223,12 +237,23 @@ as a limitation rather than resolved.
 ### Reported as a bound
 
 Both counts are reported in the write-up as a measured bound on frame
-completeness: **338 under a program-only boundary, ~618 under the chosen rule.**
-The difference, 280 grants, is the quantity at stake in the choice. This is the
+completeness: **338 under a program-only boundary, 418 under the chosen rule.**
+The difference, 80 grants, is the quantity at stake in the choice. This is the
 same move as the CTFG boundary audits. The enumerator emits these counts per
 run — `grants_in_program`, `grants_by_subject_only`, and
 `_narrower_boundary_would_have_held` — so the bound is recomputed from the data
 rather than transcribed from this note.
+
+### Correction, 2026-09-30
+
+This section originally gave the chosen boundary as "approximately 618 grants"
+and the difference from a program-only boundary as 280. Both were arithmetic
+errors. The union of the two conditions is 338 program grants plus the
+400 - 320 = 80 Technology-subject grants outside the program: **418**. O3
+enumeration confirms it: 4,319 grants read, 3,901 dropped at the boundary,
+418 kept, collapsing to 258 organizations (the kept records' `grant_count`
+sums to 418). The decision itself is unchanged; only the figures recorded
+for it were wrong, and they were corrected before any record was screened.
 
 ## 7. Downstream notes
 
@@ -254,12 +279,16 @@ Done:
 - [x] Map FORD's columns in `frames.json`, including `program_slugs` and
       `subject_slugs`, which the boundary rule selects on
 
-Outstanding, all blocking enumeration of this frame:
+Outstanding, blocking enumeration of this frame:
 
 - [ ] **Back up `snapshots/FORD/` off this machine and deposit on OSF.** Higher
       priority here than for any other frame, because the archive route failed
       and this capture is irreplaceable (§2).
-- [ ] Run `capture_log.py log` once all frames are captured
+
+Done since:
+
+- [x] Run `capture_log.py log` once all frames are captured (2026-09-25,
+      capture_log.py v1.2.0; hashes in `capture_log.json`)
 
 For the next preregistration update, this frame contributes two deviations —
 the enumeration route (§1) and the 990-PF source (§5) — plus the

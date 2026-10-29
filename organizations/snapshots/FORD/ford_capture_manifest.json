@@ -1,0 +1,21 @@
+{
+  "script": "ford_fetch.py",
+  "script_version": "1.0.0",
+  "captured_utc": "2026-09-24T00:15:07+00:00",
+  "route": "rendered HTML documents, payload extracted from div.grants-db",
+  "reason": "the registered route (manual export of a topic-filtered view) does not exist: the UI exposes only Approval date and Amount facets, search matches grantee names only, and the program appears solely as a field on each grant",
+  "page_1_url": "https://www.fordfoundation.org/work/our-grants/awarded-grants/grants-database/",
+  "page_n_pattern": "https://www.fordfoundation.org/work/our-grants/awarded-grants/grants-database/page/{n}/",
+  "pagination_mode": "query",
+  "per_page": 100,
+  "total_pages": 44,
+  "filters_applied": "NONE \u2014 full database; the program boundary is applied at enumeration, per frames.json",
+  "total_grants_reported": 4319,
+  "unique_grants_captured": 4319,
+  "year_range": [
+    2011,
+    2026
+  ],
+  "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:156.0) Gecko/20100101 Firefox/156.0",
+  "gate": "Cloudflare Turnstile; clearance obtained manually in a browser and reused"
+}

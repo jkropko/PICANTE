@@ -1,7 +1,13 @@
 # PITUN — capture notes
 
 Frame: PIT University Network member roster (Block A).
-Captured: 2026-09-23. Register freeze date: [RECORD HERE].
+Captured: 2026-09-23.
+Register freeze date: 2026-09-24, recorded at the close of capture
+rather than in advance of it (frames.json `_decisions.register_freeze_date`).
+This frame was captured the day BEFORE that date; its capture time and file
+hashes are in `O3_enumeration_and_deduplication/capture_log.json`, and the
+sequence departs from the registered one (choose the date, record it, then
+capture). Goes in the next preregistration update.
 Captured by: J. Kropko.
 Tool: `pitun_fetch.py` v2.0.0 (saved in this directory), `fetch` then `parse`.
 
@@ -251,6 +257,18 @@ Independent double coding and the reporting of unadjudicated disagreement make
 any resulting bias visible in the shared data; they do not eliminate it.
 Readers should weigh the coding of these records accordingly.
 
+**Decided 2026-09-30** (`frames.json` `_decisions.pitun_uva_conflict`). The
+research assistants are also affiliated, so for the UVA member record and the
+PIT-UN operator record the registered procedure has no unconflicted coder.
+Neither record is removed. UVA's unit resolution is done independently by both
+research assistants from the listing text alone, and a unit either of them
+finds the frame naming is used (inclusion rule), so the team cannot resolve
+itself out of the sample. Both records are coded under the literature strand's
+no-unconflicted-coder fallback, flagged `author_conflicted = all_team`, with
+the lead reviewer recused, disagreements unadjudicated, and the AI's blind
+coding reported alongside. A new sensitivity check (j) reports every
+organizational result without the four conflicted records.
+
 **Action required before coding begins:** confirm which unit the frame names
 for UVA (check `pitun_members.csv` — Positions, Co-Positions and Website), so
 the conflicted record is identified in advance rather than recognised
@@ -261,8 +279,10 @@ mid-coding.
 - [x] Capture directory and entity pages (72 members, 2026-09-23)
 - [x] Confirm the 14 missing entity pages in a browser (§3)
 - [x] 2026–27 cohort — assessed, not confirmable from the source (§7)
+- [x] Decide who resolves the UVA row, and how (2026-09-30, §8): both RAs
+      independently, inclusion rule. `_decisions.pitun_uva_conflict`.
 - [ ] **Confirm which unit the frame names for UVA**, and flag that record
-      author-conflicted in advance (§8)
+      author-conflicted in advance (§8), following that decision.
 - [ ] **Add the UVA / PIT-UN conflict to the Conflicts of Interest field in
       the next preregistration update** (§8). The registered statement covers
       Code for Charlottesville and ACT only.
@@ -274,6 +294,7 @@ mid-coding.
       archived under its own URL, ruling out a crawler limitation (§3)
 - [ ] Optional: archive Brown or Case Western (unit-specific single website)
       and CEPI FGV (placeholder href) to corroborate §4
-- [ ] Map columns in `frames.json`: `name`, `website_url`, `listing_text`.
-      Leave `location` unmapped — the frame has no location field (§5).
-- [ ] Run `capture_log.py log` once all frames are captured
+- [x] Map columns in `frames.json`: `name`, `website_url`, `listing_text`.
+      `location` left null — the frame has no location field (§5).
+- [x] Run `capture_log.py log` once all frames are captured (2026-09-25,
+      capture_log.py v1.2.0; hashes in `capture_log.json`)

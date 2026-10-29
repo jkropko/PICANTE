@@ -1,0 +1,66 @@
+# GORG — archived captures
+# One URL per line. Lines beginning with # are notes and are ignored by
+# capture_log.py, which reads the first non-comment line as the frame's
+# archive reference.
+
+# --- All four named cohorts, archived 2026-09-24 12:11-12:12 UTC ---------
+# = 08:11-08:12 EDT. Each cohort is a single page with no pagination, so one
+# snapshot per cohort is COMPLETE coverage — unlike FF and PIT-UN, where the
+# listings paginate and page 1 alone would have documented a fraction.
+
+# 2019 AI Impact Challenge — 20 grantees.
+# Google's URL and page title say 2018; the register calls it the 2019 AI
+# Impact Challenge. Same cohort: launched 2018, grantees announced May 2019.
+# Seven years old and still live, but the likeliest of the four to disappear,
+# which is why it is archived first.
+https://web.archive.org/web/20260924121156/https://impactchallenge.withgoogle.com/ai2018
+
+# 2025 Google.org Accelerator: Generative AI — 20 participants.
+# A 2024 cohort of 21 exists and is mentioned in prose on this page but not
+# listed. It is NOT in the frame; the register names only the 2025 cohort.
+https://web.archive.org/web/20260924121146/https://impactchallenge.withgoogle.com/genaiaccelerator
+
+# 2026 Impact Challenge: AI for Government Innovation — 15 recipients,
+# announced 2026-09-15 from more than 2,600 proposals.
+https://web.archive.org/web/20260924121231/https://www.google.org/impact-challenges/ai-government-innovation/
+
+# 2026 Impact Challenge: AI for Science — NO RECIPIENT LIST.
+# The most valuable of the four snapshots. See below.
+https://web.archive.org/web/20260924121237/https://www.google.org/impact-challenges/ai-science/
+
+# --- Why the AI for Science snapshot matters most ------------------------
+#
+# That cohort is recorded as PENDING: applications closed 2026-05-01 and no
+# recipient list had been published on the capture date. The register's
+# provision for a pending cohort — enumerate it when its list publishes,
+# recording that date separately from the freeze date, and report it as
+# unenumerated if it never publishes — rests on the claim that it was
+# unpublished at freeze.
+#
+# This snapshot is THIRD-PARTY DATED EVIDENCE of that claim. Without it, the
+# assertion rests on the project's own fetch log. With it, anyone can see that
+# the Internet Archive found no recipient list on 2026-09-24 either.
+#
+# It also fixes the page's "Previously funded recipients" — six organizations
+# from the EARLIER inaugural AI for Science fund, not from the named 2026
+# cohort. If a reader later asks why six organizations on that page were not
+# enumerated, the archived page shows exactly what was there and how it was
+# labelled.
+
+# --- CHECK THE SNAPSHOTS RENDERED, DO NOT ASSUME THEY DID ----------------
+#
+# The impactchallenge.withgoogle.com pages are JavaScript-driven: the live
+# page carries the fallback text "You need to enable Javascript to see the full
+# features of this website." Wayback archives what its crawler received, which
+# for a JS-rendered listing can be the page shell WITHOUT the recipient cards.
+#
+# Open each of the four snapshots and confirm the organizations are actually
+# visible. If a snapshot shows the page furniture but no recipients, say so
+# here — an archived shell is not an archived cohort, and recording it as one
+# would overstate what a third party can verify. The same lesson as FORD,
+# where a Wayback save returned the Turnstile gate rather than the database.
+#
+# [ ] ai2018 — recipients visible in the snapshot?
+# [ ] genaiaccelerator — recipients visible?
+# [ ] ai-government-innovation — recipients visible?
+# [x] ai-science — nothing to render; the absence of a list IS the evidence

@@ -1,7 +1,9 @@
 # ACT — capture notes
 
 Frame: Alliance of Civic Technologists member list (Block B).
-Captured: 2026-09-24. Register freeze date: [RECORD HERE].
+Captured: 2026-09-24.
+Register freeze date: 2026-09-24, recorded at the close of capture
+rather than in advance of it (frames.json `_decisions.register_freeze_date`).
 Captured by: J. Kropko.
 
 ---
@@ -132,9 +134,11 @@ Two consequences, both already registered:
 - [x] Wayback the raw `members.yml` at its pinned commit → `wayback.txt`
       (2026-09-24; durable *and* exact, unlike either the SHA or a page
       snapshot alone)
-- [ ] Do the same for CFA: archive `organizations.json` at its pinned commit
-- [ ] Map columns in `frames.json`: `name`, `website_url`. Leave `location`
-      unmapped — the frame has no location field (§5).
+- [x] Do the same for CFA: archive `organizations.json` at its pinned commit
+      (2026-09-24; see `../CFA/wayback.txt`)
+- [x] Map columns in `frames.json`: `name` → `name`, `website_url` → `url`;
+      `location` and `listing_text` left null — the frame has neither (§5).
 - [ ] Check whether either research assistant is affiliated with ACT or Code
       for Charlottesville (§3)
-- [ ] Run `capture_log.py log` once all frames are captured
+- [x] Run `capture_log.py log` once all frames are captured (2026-09-25,
+      capture_log.py v1.2.0; hashes in `capture_log.json`)

@@ -1,0 +1,39 @@
+{
+  "script": "gorg_fetch.py",
+  "script_version": "1.4.0",
+  "captured_utc": "2026-09-24T12:26:56+00:00",
+  "cohorts": {
+    "ai2018": {
+      "cohort": "2019 AI Impact Challenge",
+      "url": "https://impactchallenge.withgoogle.com/ai2018",
+      "expected": 20,
+      "pending": false,
+      "note": "Launched 2018, grantees announced May 2019. Google's own URL and page title say 2018; the register calls it the 2019 AI Impact Challenge. Same cohort. Still live despite its age, but the most likely of the four to disappear, so archive it."
+    },
+    "genaiaccelerator": {
+      "cohort": "2025 Google.org Accelerator: Generative AI",
+      "url": "https://impactchallenge.withgoogle.com/genaiaccelerator",
+      "expected": 20,
+      "pending": false,
+      "note": "The 2025 cohort. A 2024 cohort of 21 exists and is mentioned in prose on this page but not listed; it is NOT in the frame."
+    },
+    "ai-government-innovation": {
+      "cohort": "2026 Impact Challenge: AI for Government Innovation",
+      "url": "https://www.google.org/impact-challenges/ai-government-innovation/",
+      "expected": 15,
+      "pending": false,
+      "note": "Recipients announced 2026-09-15, selected from more than 2,600 proposals."
+    },
+    "ai-science": {
+      "cohort": "2026 Impact Challenge: AI for Science",
+      "url": "https://www.google.org/impact-challenges/ai-science/",
+      "expected": 0,
+      "pending": true,
+      "note": "PENDING. Applications closed 2026-05-01; no recipient list published as of the capture date. The page is captured as dated evidence of non-publication. Its 'Previously funded recipients' belong to the earlier inaugural AI for Science fund and are NOT this cohort; no organization is extracted from this page."
+    }
+  },
+  "organizations": 55,
+  "_frame": "The union of four NAMED cohorts. Cohorts announced after the freeze date do not enter the frame regardless of when they are announced.",
+  "_pending": "2026 Impact Challenge: AI for Science had published no recipient list on the capture date. Record it as pending, enumerate it if and when its list publishes, recording THAT date separately from the freeze date, and report it as unenumerated if it never publishes.",
+  "_not_captured": "The six organizations under 'Previously funded recipients' on the AI for Science page belong to the earlier inaugural AI for Science fund and are not one of the four named cohorts. No record was extracted from that page."
+}

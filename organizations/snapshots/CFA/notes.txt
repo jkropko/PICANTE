@@ -1,7 +1,14 @@
 # CFA — capture notes
 
 Frame: Code for America brigade roster, archived (Block B).
-Captured: 2026-09-23/24. Register freeze date: [RECORD HERE].
+Captured: 2026-09-23/24.
+Register freeze date: 2026-09-24, recorded at the close of capture
+rather than in advance of it (frames.json `_decisions.register_freeze_date`).
+Capture began the day before that date; capture times and file hashes are in
+`O3_enumeration_and_deduplication/capture_log.json`, and the sequence departs
+from the registered one (choose the date, record it, then capture). Goes in
+the next preregistration update. Pinned to a commit SHA regardless (§1), so
+the frozen contents do not depend on the date.
 Captured by: J. Kropko.
 
 ---
@@ -70,26 +77,112 @@ small volunteer group with a thin web presence — the tier-2 organizations that
 do the work without the field vocabulary, which the draw rule goes out of its
 way to reach before sampling can stop.
 
-## 4. OUTSTANDING: the tag vocabulary is not confirmed
+The rule itself is unchanged by §3a below. What §3a changes is which field
+the rule reads.
 
-The file is not brigades only. The register records that it also holds 18F,
-Code for All members, German OK Labs, Code for Poland and government entities,
-and that of 221 records roughly 181 carry a Brigade tag.
+## 3a. Boundary: the location FIELD, decided at O3
 
-`frames.json` currently carries placeholder tag rules —
-`include_any: ["Brigade"]`, `exclude_any: ["Code for All", "Government"]` —
-which are **guesses, not observations**. The reader refuses to run on an empty
-`include_any`, but it cannot tell a wrong tag from a right one.
+Decided 2026-09-30, before any record was enumerated, screened or coded, and
+recorded in `frames.json` under `_decisions.cfa_location_field`: the boundary
+tests the roster's **structured `location.country` field**
+(`columns.country = "location.country"`). The free-text `city` string is used
+only where the country field is blank. `location_rule` stays
+`drop_clearly_non_us`.
 
-Before enumerating:
+**Why.** The city string misreads. `us_location_guess` treats a two-letter
+token as a US state abbreviation, and three Brazilian brigades give their city
+as "<city>, PR" — Paraná — which it reads as Puerto Rico. They would have
+passed the boundary as US. Four more non-US brigades carry city strings the
+function cannot read at all and would have been retained as undeterminable.
+The country field states each of these outright.
 
-    python enumerate_o3.py inspect --frame CFA --file snapshots/CFA/organizations.json
+**Measured on the pinned file** (frames_io.py 1.1.0):
 
-That prints the full tag inventory with counts. Set `include_any`,
-`exclude_any` and `independence_tags` from what is actually there, and record
-the inventory here.
+    boundary reads          kept   undeterminable retained
+    city string only         129                         5
+    country field            122                         0
 
-This is the one thing standing between this frame and O3.
+The seven records kept under the city string and dropped under the country
+field are all non-US by the frame's own country field: the three Paraná
+brigades, two Canadian brigades, and two further Brazilian brigades. The
+country field drops nothing the city string keeps. All seven would have failed
+C2 at O4; the choice moves their exclusion from a coder's determination to the
+boundary, where the drop log records it.
+
+**Fallback.** Five brigades have no location object at all. For those the
+boundary reads the city string; all five read US. Every kept record's `notes`
+states which basis decided it (`country_field` or
+`city_fallback_country_blank`), and the run manifest reports the counts.
+
+**What this does not change.** The country field is the frame's own claim and
+is **not C2**. Every kept record still receives a C2 determination at O4 from
+the organization's own materials. Puerto Rico is recorded as USA by the frame
+and is retained.
+
+## 4. Tag vocabulary — CONFIRMED
+
+Confirmed 2026-09-30 against the pinned file with
+`enumerate_o3.py inspect --frame CFA`. The earlier rules were taken from the
+register's prose and had not been checked against the file.
+
+**Inventory.** 221 records; 220 carry a `tags` list; 19 distinct tags:
+
+    181  Brigade                                      5  Partner
+     96  Code for America                             4  Code for Poland
+     93  Official                                     3  Fellowship
+     18  Code for All                                 3  Code for All Affiliate
+     18  OK Lab                                       3  partner
+     13  Code for America Fiscally Sponsored Brigade  2  Brigade Collaboration
+     10  Government                                   2  Code for Japan
+      9  midwest                                      2  Code for Romania
+      5  Code for America Partner Brigade             2  Project
+                                                      1  Temporary
+
+Matching is **exact** (case-insensitive), not substring. `Brigade` does not
+match `Brigade Collaboration` or `Code for America Fiscally Sponsored Brigade`.
+
+**Rules set in `frames.json`:**
+
+    include_any        ["Brigade"]
+    exclude_any        ["Code for All", "Government"]
+    independence_tags  ["Official",
+                        "Code for America Fiscally Sponsored Brigade",
+                        "Code for America Partner Brigade"]
+
+- `include_any` confirmed as is. 181 records carry `Brigade` exactly.
+- `exclude_any` kept as is, and harmless. `Government` never co-occurs with
+  `Brigade`. `Code for All` co-occurs with it on three records, all non-US by
+  the country field, so the exclusion changes only the reason logged for them,
+  not whether they leave. The German OK Labs, Code for Poland, Code for Japan
+  and Code for Romania brigades are all tagged `Brigade`; they leave on
+  location (§3a), not on tag, so no exclusion is needed for them.
+- **`independence_tags` corrected.** The placeholder read
+  `["Official", "Partner", "Fiscally Sponsored"]`. No tag `Fiscally Sponsored`
+  exists, and `Partner` / `partner` never co-occur with `Brigade`, so under
+  exact matching the fiscal-sponsorship status of every brigade would have
+  been silently lost — and it is what routes a record to the Rule 1
+  fiscal-sponsor clause (§6). The real tags are the long-form ones above.
+
+**Result under the confirmed rules and §3a** (measured, frames_io.py 1.1.0):
+
+    rows read                         221
+    dropped, excluded tag              28
+    dropped, no include tag            15
+    dropped, location non-US           56
+    kept                              122
+
+    of the 122 kept:
+      Official only                                        75
+      Official + CfA Fiscally Sponsored Brigade            13
+      Official + CfA Partner Brigade                        5
+      no independence tag                                  29
+
+The 28 + 15 tag drops are the 40 non-brigade records (18F, government
+entities, Code for All members, partners, projects) plus the three
+Code-for-All-tagged brigades. Code for America itself is among the
+non-brigade records; it enters the pool as a Rule 2 operator, not from this
+frame. Code for Charlottesville is among the 122 (author-conflicted; see
+`../ACT/notes.txt` §3).
 
 ## 5. Expected overlap with ACT
 
@@ -117,8 +210,9 @@ a historical frame alongside a current one.
 - The roster carries `previous_names`, captured and retained. It is how a
   brigade that renamed itself after the sunset is recognised as the same
   organization at deduplication.
-- Independence tags (Official, Partner, Fiscally Sponsored, or whatever the
-  inventory shows) are recorded per record. A fiscally sponsored brigade
+- Independence tags (`Official`, `Code for America Fiscally Sponsored
+  Brigade`, `Code for America Partner Brigade`; §4) are recorded per record in
+  `cfa_independence_tag`. A fiscally sponsored brigade
   engages the Rule 1 fiscal-sponsor clause: resolve to the sponsored project if
   the frame names it and it meets C1 independently, otherwise to the sponsor,
   recording the routing. Never enter both.
@@ -132,10 +226,13 @@ a historical frame alongside a current one.
 - [x] Archive `organizations.json` at its pinned commit → `wayback.txt`
       (2026-09-24)
 - [x] Decide the location rule — `drop_clearly_non_us`, 2026-09-16 (§3)
-- [ ] **Confirm the tag vocabulary** with `inspect` and set `include_any`,
-      `exclude_any`, `independence_tags` in `frames.json` (§4)
-- [ ] Map the remaining columns in `frames.json` against the real field names
-      (`name`, `website`, `city`, `tags`, `previous_names` are the current
-      guesses)
-- [ ] `primary.txt` naming `organizations.json`
-- [ ] Run `capture_log.py log` once all frames are captured
+- [x] Confirm the tag vocabulary with `inspect`; set `include_any`,
+      `exclude_any`, `independence_tags` in `frames.json` (2026-09-30, §4)
+- [x] Confirm column names against the file: `name`, `website`, `city`,
+      `tags`, `previous_names` all present; `location.country` added (§3a)
+- [x] Decide the location field — `location.country`, city fallback,
+      2026-09-30 (§3a)
+- [x] `primary.txt` — not needed. The directory holds one data file, which
+      `capture_log.py` resolves without it.
+- [x] Run `capture_log.py log` once all frames are captured (2026-09-25,
+      capture_log.py v1.2.0; hashes in `capture_log.json`)

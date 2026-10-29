@@ -1,7 +1,9 @@
 # FF — capture notes
 
 Frame: Fast Forward accelerator portfolio (Block C).
-Captured: 2026-09-24. Register freeze date: [RECORD HERE].
+Captured: 2026-09-24.
+Register freeze date: 2026-09-24, recorded at the close of capture
+rather than in advance of it (frames.json `_decisions.register_freeze_date`).
 Captured by: J. Kropko.
 Tool: `ffwd_fetch.py` v1.0.0 (kept in this directory), `fetch` then `parse`.
 
@@ -154,7 +156,7 @@ field size.
       102 is independently archived, which matters here because the portfolio
       grows with each cohort and a later re-fetch cannot reproduce the freeze
       state.
-- [ ] Map columns in `frames.json`: `name`, `website_url`, `listing_text`.
-      Leave `location` unmapped — the regions field is beneficiary geography
-      (§2).
-- [ ] Run `capture_log.py log` once all frames are captured
+- [x] Map columns in `frames.json`: `name`, `website_url`, `listing_text`.
+      `location` left null — the regions field is beneficiary geography (§2).
+- [x] Run `capture_log.py log` once all frames are captured (2026-09-25,
+      capture_log.py v1.2.0; hashes in `capture_log.json`)

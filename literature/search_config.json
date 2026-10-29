@@ -1,0 +1,15 @@
+{
+  "database": "tpg_search.sqlite",
+  "seed_file": "TPG_seed_set_v2.xlsx",
+  "validation_file": "TPG_search_validation_set.xlsx",
+  "mailto": "YOUR_EMAIL_HERE",
+
+  "seed_identifier_overrides": {},
+
+  "merge_checks": {
+    "seed 22": ["10.18653/v1/2026.eacl-long.238", "10.48550/arXiv.2505.22327"]
+  },
+  "validation_alternates": {
+    "V4": ["10.48550/arXiv.1810.12847"]
+  }
+}

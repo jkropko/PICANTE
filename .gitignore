@@ -1,3 +1,6 @@
+PICANTEagent/
+status/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
@@ -233,3 +236,7 @@ organizations/snapshots/**
 !organizations/snapshots/*/README.md
 !organizations/snapshots/*/*.py
 !organizations/snapshots/*/*_manifest.json
+!organizations/O3_enumeration_and_deduplication/config/frames.json
+!organizations/O3_enumeration_and_deduplication/config/operators.json
+!organizations/snapshots/GORG/gorg_fetch.py
+!organizations/snapshots/GORG/notes.txt

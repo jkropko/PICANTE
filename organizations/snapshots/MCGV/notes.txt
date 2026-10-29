@@ -1,7 +1,9 @@
 # MCGV — capture notes
 
 Frame: Patrick J. McGovern Foundation grantee listing (Block C).
-Captured: 2026-09-24. Register freeze date: [RECORD HERE].
+Captured: 2026-09-24.
+Register freeze date: 2026-09-24, recorded at the close of capture
+rather than in advance of it (frames.json `_decisions.register_freeze_date`).
 Captured by: J. Kropko.
 
 ---
@@ -205,4 +207,5 @@ No author conflict is known for this frame.
       the join matched all 450 names exactly
 - [x] `primary.txt` naming `mcgv_grants_with_urls.csv`, written by
       `mcgv_urls.py join` alongside the merged file itself (see below).
-- [ ] Run `capture_log.py log` once all frames are captured
+- [x] Run `capture_log.py log` once all frames are captured (2026-09-25,
+      capture_log.py v1.2.0; hashes in `capture_log.json`)
